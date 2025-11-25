@@ -1,0 +1,4 @@
+- name: Install suggested packages
+  run: |
+    install.packages("gemR")
+  shell: Rscript {0}
