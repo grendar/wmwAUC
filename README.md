@@ -9,12 +9,23 @@ Variables)
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of wmwAUC is to provide the inferences for the
-Wilcoxon-Mann-Whitney test of $\mathrm{H0: AUC = 0.5}$.
+The traditional WMW null hypothesis
+$\mathrm{H_0}\textrm{:}\,\mathrm{F = G}$ is erroneously too broad. WMW
+actually tests narrower $\mathrm{H_0}\textrm{:}\,\textrm{AUC} = 0.5$.
+Asymptotic distribution of the standardized $U$ statistic (i.e., the
+empirical AUC) under the correct $\mathrm{H_0}$ is derived along with
+finite sample bias corrections. The traditional alternative hypothesis
+of stochastic dominance is too narrow. WMW is consistent against
+$\mathrm{H_1}\textrm{:}\,\mathrm{AUC} \neq 0.5$, as established by Van
+Dantzig in 1951. See ([Grendár 2025](#ref-grendar2025wmw)).
+
+The primary goal of wmwAUC is to provide the inferences for the
+Wilcoxon-Mann-Whitney test of
+$\mathrm{H_0}\textrm{:}\,\mathrm{AUC} = 0.5$.
 
 ## Installation
 
-You can install the development version of wmwAUC like so:
+You can install the development version of wmwAUC using
 
 ``` r
 devtools::install_github('grendar/wmwAUC')
@@ -23,8 +34,8 @@ devtools::install_github('grendar/wmwAUC')
 ## Simulation 1
 
 Consider the setting of two zero-mean different-scale gaussians. Then
-the traditional $\mathrm{H0: F = G}$ of WMW test is false and
-$\mathrm{H1: F \neq G}$ holds.
+the traditional $\mathrm{H_0}\textrm{:}\,\mathrm{F = G}$ of WMW test is
+false and $\mathrm{H_1}\textrm{:}\,\mathrm{F \neq G}$ holds.
 
 The Monte Carlo simulation demonstrates that the normalized test
 statistic $U/(n_1n_2)$ which is just eAUC, concentrates asymptotically
@@ -33,11 +44,11 @@ on 0.5 - the value expected under a true null hypothesis.
 If WMW tested distributional equality, the test statistic should not
 concentrate on its null value when distributions clearly differ.
 
-Also note that under $\mathrm{H1: F \neq G}$, p-values should
-concentrate near zero, yet the observed distribution is nearly uniform
-with a slightly elevated first bins, consistent with testing a true null
-hypothesis ($\mathrm{AUC = 0.5}$) using miscalibrated variance
-estimation.
+Also note that under $\mathrm{H_1}\textrm{:}\,\mathrm{F \neq G}$,
+p-values should concentrate near zero, yet the observed distribution is
+nearly uniform with a slightly elevated first bins, consistent with
+testing a true null hypothesis ($\mathrm{AUC = 0.5}$) using
+miscalibrated variance estimation.
 
 ``` r
 #############################################################################
@@ -69,20 +80,29 @@ data(simulation1)  # List eauc, pval_wt, pval_wmw
 ```
 
 <img src="man/figures/README-hist_sim1_1-1.png" width="50%" style="display: block; margin: auto;" />
-Empirical AUC centered at 0.5 despite F != G
+
+Empirical AUC centered at 0.5 despite $\mathrm{F \neq G}$
 
 <img src="man/figures/README-hist_sim1_2-1.png" width="50%" style="display: block; margin: auto;" />
-Traditional p-values should under H1 concentrate near 0.
+
+Traditional p-values under $\mathrm{H_1}$ should concentrate near 0.
 
 <img src="man/figures/README-hist_sim1_3-1.png" width="50%" style="display: block; margin: auto;" />
-Correct p-values (correctly testing AUC = 0.5)
+
+Correct p-values for testing $\mathrm{H_0: AUC = 0.5}$, based on
+([Grendár 2025](#ref-grendar2025wmw)).
 
 ## Simulation 2
+
+The two zero-mean different-scale gaussians setting does not satisfy the
+traditional $\mathrm{H_1}$ of the stochastic dominance. But, as proved
+by Van Dantzig in 1951, WMW is consistent for broader
+$\mathrm{H_1}\textrm{:}\,\textrm{AUC} \neq 0.5$
 
 ``` r
 #############################################################################
 #
-# Simulation 2: H1: F stoch. dominates G is erroneously too narrow
+# Simulation 2: H1: F stoch. dominates G is too narrow
 #               WMW is consistent for broader H1: AUC != 0.5   
 #
 #############################################################################
@@ -178,19 +198,10 @@ wmd
 ### Check location-shift assumption with EDA
 
 <img src="man/figures/README-quadruplot_Ex2-1.png" width="100%" style="display: block; margin: auto;" />
-location-shift assumption not tenable
+**location-shift assumption not tenable**.
 
-Note that medians are essentially the same:
-
-``` r
-median(da$y[da$group == 'case'])
-#> [1] 0.4949383
-median(da$y[da$group == 'control'])
-#> [1] 0.4926145
-```
-
-Erroneous use of location-shift special case would falsely conclude
-significant median difference despite identical medians
+*Erroneous* use of location-shift special case of WMW would falsely
+conclude significant median difference despite identical medians
 
     #> 
     #>         Wilcoxon-Mann-Whitney Test of No Group Discrimination
@@ -210,6 +221,15 @@ significant median difference despite identical medians
     #>  -0.094 -0.016
     #> Hodges-Lehmann median of all pairwise distances:
     #>  -0.048 [location effect size: eAUC = 0.370]
+
+Indeed, the medians are essentially the same:
+
+``` r
+median(da$y[da$group == 'case'])
+#> [1] 0.4949383
+median(da$y[da$group == 'control'])
+#> [1] 0.4926145
+```
 
 ## Example 3
 
@@ -240,7 +260,7 @@ wmd
 ### EDA to assess location shift assumption validity
 
 <img src="man/figures/README-quadruplot_Ex3-1.png" width="100%" style="display: block; margin: auto;" />
-hence, location shift assumption is tenable
+hence, **location shift assumption is tenable**
 
 ### Special case of WMW test
 
@@ -273,11 +293,17 @@ wml
 Plot
 <img src="man/figures/README-plot_ex3-1.png" width="100%" style="display: block; margin: auto;" />
 
-You’ll still need to render `README.Rmd` regularly, to keep `README.md`
-up-to-date. `devtools::build_readme()` is handy for this. You could also
-use GitHub Actions to re-render `README.Rmd` every time you push. An
-example workflow can be found here:
-<https://github.com/r-lib/actions/tree/v1/examples>.
+# References
 
-In that case, don’t forget to commit and push the resulting figure
-files, so they display on GitHub and CRAN.
+<div id="refs" class="references csl-bib-body hanging-indent"
+entry-spacing="0">
+
+<div id="ref-grendar2025wmw" class="csl-entry">
+
+Grendár, Marian. 2025. “Wilcoxon-Mann-Whitney Test of No Group
+Discrimination.” 2025.
+[\url{https://doi.org/10.5281/zenodo.17714195}](\url{https://doi.org/10.5281/zenodo.17714195}).
+
+</div>
+
+</div>
