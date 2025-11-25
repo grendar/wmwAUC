@@ -1,5 +1,5 @@
 ---
-output: html_document
+output: github_document
 title: 'Wilcoxon-Mann-Whitney Test of No Group Discrimination (Continuous Variables)'
 ---
 

@@ -1,3 +1,6 @@
+Wilcoxon-Mann-Whitney Test of No Group Discrimination (Continuous
+Variables)
+================
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
@@ -14,7 +17,7 @@ Wilcoxon-Mann-Whitney test of $\mathrm{H0: AUC = 0.5}$.
 You can install the development version of wmwAUC like so:
 
 ``` r
-# FILL THIS IN! HOW CAN PEOPLE INSTALL YOUR DEV PACKAGE?
+devtools::install_github('grendar/wmwAUC')
 ```
 
 ## Simulation 1
@@ -62,25 +65,17 @@ estimation.
 #   #
 # }
 data(simulation1)  # List eauc, pval_wt, pval_wmw
-# Empirical AUC centered at 0.5 despite F != G
-hist(simulation1$eauc)
+#
 ```
 
-<img src="man/figures/README-simulation1-1.png" width="100%" />
+<img src="man/figures/README-hist_sim1_1-1.png" width="50%" style="display: block; margin: auto;" />
+Empirical AUC centered at 0.5 despite F != G
 
-``` r
-# Traditional p-values (incorrectly testing F = G)
-hist(simulation1$pval_wt) 
-```
+<img src="man/figures/README-hist_sim1_2-1.png" width="50%" style="display: block; margin: auto;" />
+Traditional p-values should under H1 concentrate near 0.
 
-<img src="man/figures/README-simulation1-2.png" width="100%" />
-
-``` r
-# Correct p-values (correctly testing AUC = 0.5)  
-hist(simulation1$pval_wmw)
-```
-
-<img src="man/figures/README-simulation1-3.png" width="100%" />
+<img src="man/figures/README-hist_sim1_3-1.png" width="50%" style="display: block; margin: auto;" />
+Correct p-values (correctly testing AUC = 0.5)
 
 ## Simulation 2
 
@@ -115,22 +110,9 @@ hist(simulation1$pval_wmw)
 # }
 data(simulation2)  # List of eauc, pval_wt, pval_wmw
 # WMW detects broader alternatives than traditional stochastic dominance
-hist(simulation2$eauc)
 ```
 
-<img src="man/figures/README-simulation2-1.png" width="100%" />
-
-``` r
-hist(simulation2$pval_wmw)
-```
-
-<img src="man/figures/README-simulation2-2.png" width="100%" />
-
-``` r
-hist(simulation2$pval_wt)
-```
-
-<img src="man/figures/README-simulation2-3.png" width="100%" />
+<img src="man/figures/README-hist_sim2-1.png" width="50%" style="display: block; margin: auto;" /><img src="man/figures/README-hist_sim2-2.png" width="50%" style="display: block; margin: auto;" /><img src="man/figures/README-hist_sim2-3.png" width="50%" style="display: block; margin: auto;" />
 
 ## Example 1
 
@@ -146,7 +128,7 @@ df <- as.data.frame(da$proteins)
 df$MS <- da$MS
 ```
 
-Discrimination
+### Test of no group discrimination
 
 ``` r
 wmd <- wmw_test(P19099 ~ MS, data = df, ref_level = 'no')
@@ -164,7 +146,7 @@ wmd
 #>  0.729
 ```
 
-<img src="man/figures/README-plot_ex1-1.png" width="60%" style="display: block; margin: auto;" />
+<img src="man/figures/README-plot_ex1-1.png" width="50%" style="display: block; margin: auto;" />
 
 ## Example 2
 
@@ -189,31 +171,26 @@ wmd
 #>  0.294 0.447
 #> empirical AUC (eAUC):
 #>  0.370
-plot(wmd)
 ```
 
-<img src="man/figures/README-example2-1.png" width="100%" />
+<img src="man/figures/README-ROC_example2-1.png" width="50%" style="display: block; margin: auto;" />
+
+### Check location-shift assumption with EDA
+
+<img src="man/figures/README-quadruplot_Ex2-1.png" width="100%" style="display: block; margin: auto;" />
+location-shift assumption not tenable
+
+Note that medians are essentially the same:
 
 ``` r
-
-# Check location-shift assumption with EDA
-qp <- quadruplot(y ~ group, data = da, ref_level = 'control')
-qp
-```
-
-<img src="man/figures/README-example2-2.png" width="100%" />
-
-``` r
-# => location-shift assumption not tenable
-
-# Note that medians are essentially the same:
 median(da$y[da$group == 'case'])
 #> [1] 0.4949383
-# 0.495
 median(da$y[da$group == 'control'])
 #> [1] 0.4926145
-# 0.493
 ```
+
+Erroneous use of location-shift special case would falsely conclude
+significant median difference despite identical medians
 
     #> 
     #>         Wilcoxon-Mann-Whitney Test of No Group Discrimination
@@ -236,7 +213,7 @@ median(da$y[da$group == 'control'])
 
 ## Example 3
 
-Another real-life data set.
+WMW applied to another real-life data set.
 
 ``` r
 data(wesdr)
@@ -256,25 +233,18 @@ wmd
 #>  0.502 0.591
 #> empirical AUC (eAUC):
 #>  0.547
-plot(wmd)
 ```
 
-<img src="man/figures/README-Ex3-1.png" width="100%" />
+<img src="man/figures/README-roc_Ex3-1.png" width="50%" style="display: block; margin: auto;" />
+
+### EDA to assess location shift assumption validity
+
+<img src="man/figures/README-quadruplot_Ex3-1.png" width="100%" style="display: block; margin: auto;" />
+hence, location shift assumption is tenable
+
+### Special case of WMW test
 
 ``` r
-
-
-# EDA to assess location shift assumption validity
-qp <- quadruplot(bmi ~ ret, data = da, ref_level = '0')
-qp
-```
-
-<img src="man/figures/README-Ex3-2.png" width="100%" />
-
-``` r
-# => location shift assumption is tenable
- 
-# Special case of WMW test
 suppressWarnings({ # ties in data
 wml <- wmw_test(bmi ~ ret, data = da, ref_level = '0', 
                  ci_method = 'boot', special_case = TRUE)
@@ -298,20 +268,16 @@ wml
 #>  0.000 1.100
 #> Hodges-Lehmann median of all pairwise distances:
 #>  0.600 [location effect size: eAUC = 0.547]
-plot(wml)
 ```
 
-<img src="man/figures/README-Ex3-3.png" width="100%" />
+Plot
+<img src="man/figures/README-plot_ex3-1.png" width="100%" style="display: block; margin: auto;" />
 
 You’ll still need to render `README.Rmd` regularly, to keep `README.md`
 up-to-date. `devtools::build_readme()` is handy for this. You could also
 use GitHub Actions to re-render `README.Rmd` every time you push. An
 example workflow can be found here:
 <https://github.com/r-lib/actions/tree/v1/examples>.
-
-You can also embed plots, for example:
-
-<img src="man/figures/README-pressure-1.png" width="100%" />
 
 In that case, don’t forget to commit and push the resulting figure
 files, so they display on GitHub and CRAN.
