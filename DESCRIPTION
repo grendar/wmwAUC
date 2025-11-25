@@ -1,0 +1,19 @@
+Package: wmwAUC
+Title: Wilcoxon-Mann-Whitney Test of No Group Discrimination (Continuous Variables)
+Version: 0.0.0.9000
+Authors@R:
+    person("Marian", "Grendar", , "marian.grendar@gmail.com", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-6712-3457"))
+Description: Distribution-free Wilcoxon-Mann-Whitney test of no AUC-detectable
+    group discrimination (H0: AUC = 0.5) for continuous random variables.
+    Under location-shift assumption, equivalently tests H0: zero location difference.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+Depends: R (>= 4.2.0)
+Suggests: testthat (>= 3.0.0), ggsci, viridis,
+        gemR, gss, knitr, rmarkdown, ggbeeswarm,
+        ggplot2, qqplotr, rlang, twosamples,
+        patchwork, sfsmisc, stats
+Config/testthat/edition: 3
