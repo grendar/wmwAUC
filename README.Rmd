@@ -1,7 +1,7 @@
 ---
 output: github_document
 title: 'Wilcoxon-Mann-Whitney Test of No Group Discrimination (Continuous Variables)'
-bibliography: refs.bib
+bibliography: inst/refs.bib
 link-citations: true
 ---
 

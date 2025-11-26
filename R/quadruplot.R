@@ -276,8 +276,6 @@ quadruplot <- function(formula, data,
   #
   calc_simultaneous_ecdf_bands_sfsmisc <- function(x, alpha = 0.05) {
     
-    library(sfsmisc)
-    
     # Note: KSd() is hardcoded for alpha = 0.05 (95% confidence)
     if (alpha != 0.05) {
       warning("sfsmisc::KSd() only supports alpha = 0.05 (95% confidence). Using alpha = 0.05.")
