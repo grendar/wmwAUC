@@ -42,7 +42,7 @@ The traditional WMW null hypothesis $\mathrm{H_0}\textrm{:}\,\mathrm{F = G}$ is 
 WMW actually tests narrower $\mathrm{H_0}\textrm{:}\,\textrm{AUC} = 0.5$. Asymptotic distribution of the 
 standardized $U$ statistic (i.e., the empirical AUC) under the correct $\mathrm{H_0}$ is derived along with finite sample bias corrections. The traditional alternative hypothesis of stochastic dominance is too narrow. WMW is consistent against $\mathrm{H_1}\textrm{:}\,\mathrm{AUC} \neq 0.5$, as established by Van Dantzig in 1951. See [@grendar2025wmw].
 
-The primary goal of wmwAUC is to provide the inferences for the Wilcoxon-Mann-Whitney test
+The primary goal of wmwAUC is to provide inferences for the Wilcoxon-Mann-Whitney test
 of $\mathrm{H_0}\textrm{:}\,\mathrm{AUC} = 0.5$. 
 
 ## Installation

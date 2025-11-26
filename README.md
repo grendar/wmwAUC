@@ -19,7 +19,7 @@ of stochastic dominance is too narrow. WMW is consistent against
 $\mathrm{H_1}\textrm{:}\,\mathrm{AUC} \neq 0.5$, as established by Van
 Dantzig in 1951. See ([Grendár 2025](#ref-grendar2025wmw)).
 
-The primary goal of wmwAUC is to provide the inferences for the
+The primary goal of wmwAUC is to provide inferences for the
 Wilcoxon-Mann-Whitney test of
 $\mathrm{H_0}\textrm{:}\,\mathrm{AUC} = 0.5$.
 
@@ -301,8 +301,7 @@ entry-spacing="0">
 <div id="ref-grendar2025wmw" class="csl-entry">
 
 Grendár, Marian. 2025. “Wilcoxon-Mann-Whitney Test of No Group
-Discrimination.” 2025.
-[\url{https://doi.org/10.5281/zenodo.17714195}](\url{https://doi.org/10.5281/zenodo.17714195}).
+Discrimination.” 2025. <https://arxiv.org/abs/2511.20308>.
 
 </div>
 
