@@ -291,6 +291,7 @@
 #' del Barrio, E., Cuesta-Albertos, J. A., & Matrán, C. (2025). Invariant measures 
 #' of disagreement with stochastic dominance. The American Statistician, 1-13.
 #' 
+#' Grendar, M. (2025). Wilcoxon-Mann-Whitney test of no group discrimination. arXiv:2511.20308.
 #'
 #' @seealso
 #' \code{\link{print.wmw_test}} for formated output of \code{\link{wilcox.test}}.
