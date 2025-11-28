@@ -96,7 +96,7 @@ Correct p-values for testing $\mathrm{H_0\colon AUC = 0.5}$.
 The two zero-mean different-scale gaussians setting does not satisfy the
 traditional $\mathrm{H_1}$ of the stochastic dominance. But, as proved
 by Van Dantzig in 1951, WMW is consistent for broader
-$\mathrm{H_1\colon\,\textrm{AUC} \neq 0.5$
+$\mathrm{H_1\colon\,\textrm{AUC} \neq 0.5}$
 
 ``` r
 #############################################################################
