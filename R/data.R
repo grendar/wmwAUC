@@ -23,6 +23,19 @@ NULL
 NULL
 #'
 #'
+#' @name simulation3
+#' @title Synthetic data
+#' @docType data
+#' @usage data(simulation3)
+#' @format A list containing simulation results (N=500, n=300):
+#' \describe{
+#'   \item{wmw_ci}{95% confidence intervals obtained by pseudomedian_ci()}
+#'   \item{wt_ci}{95% confidence intervals obtained by wilcox.test()}
+#'   \item{eauc}{Values of eAUC}
+#'   \item{pseudomedian}{Values of the pseudomedian}
+#' }
+NULL
+#'
 #' @name Ex2
 #' @title Synthetic data
 #' @description A data frame with numeric `y` and factor `group`

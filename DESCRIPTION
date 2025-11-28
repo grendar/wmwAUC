@@ -1,6 +1,7 @@
 Package: wmwAUC
 Title: Wilcoxon-Mann-Whitney Test of No Group Discrimination (Continuous Variables)
-Version: 0.0.0.9000
+Version: 0.1.0
+Date: 2025-11-28
 Authors@R:
     person("Marian", "Grendar", , "marian.grendar@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-6712-3457"))

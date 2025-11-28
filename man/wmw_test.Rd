@@ -2,7 +2,7 @@
 % Please edit documentation in R/wmw_test.R
 \name{wmw_test}
 \alias{wmw_test}
-\title{Wilcoxon-Mann-Whitney Test of No Group Discrimination (Continuous Variables)}
+\title{Wilcoxon-Mann-Whitney Test of No Group Discrimination  (Continuous Variables)}
 \usage{
 wmw_test(
   formula,
@@ -53,8 +53,9 @@ Object of class 'wmw_test' containing:
 \item{alternative}{Alternative hypothesis specification used in \code{wilcox.test}}
 \item{method}{Character string describing the test method}
 \item{data.name}{Character string giving the name of the data}
-\item{conf.int}{Confidence interval for the location shift (when special_case = TRUE)}
 \item{estimate}{Hodges-Lehmann median difference estimate (when special_case = TRUE)}
+\item{conf.int}{Confidence interval for the location shift (when special_case = TRUE)}
+\item{conf.level}{Confidence level for the confidence interval for HL estimator (when special_case = TRUE)}
 \item{null.value}{Null hypothesis value (mu = 0 for location shift)}
 \item{ci_method}{Method used to compute confidence interval for AUC}
 \item{roc_object}{ROC analysis object returned by \code{roc_with_ci} function}
@@ -68,15 +69,21 @@ Object of class 'wmw_test' containing:
 }
 \description{
 Performs distribution-free Wilcoxon-Mann-Whitney test for AUC-detectable
-group discrimination, testing \eqn{H0: \mathrm{AUC} = 0.5}{AUC = 0.5} against
-\eqn{H1: \mathrm{AUC} \neq 0.5}{AUC != 0.5}.
+group discrimination, testing \eqn{\mathrm{H_0\colon AUC} = 0.5}{H0: AUC = 0.5}
+against \eqn{\mathrm{H_1\colon AUC} \neq 0.5}{H1: AUC != 0.5}.
 Under location-shift assumption, equivalently tests zero location difference.
-Derived under \eqn{H0: \mathrm{AUC} = 0.5}{AUC = 0.5}.
 }
 \details{
-The function tests the null hypothesis H0: AUC = 0.5 against H1: AUC != 0.5,
+Constructs confidence intervals for the pseudomedian via test inversion.
+Under location-shift assumptions (\eqn{G(x) = F(x - \delta)}), the pseudomedian
+represents the location difference between groups.
+
+Derived under \eqn{\mathrm{H_0\colon AUC} = 0.5}{H0: AUC = 0.5}.
+
+The function tests the null hypothesis \eqn{\mathrm{H_0\colon AUC} = 0.5}{H0: AUC = 0.5}
+against \eqn{\mathrm{H_0\colon AUC} \neq 0.5}{H1: AUC != 0.5},
 where AUC represents the Area Under the ROC Curve and equals the probability
-P(X > Y) that a randomly selected observation from the first group exceeds a randomly
+\eqn{P(X > Y)} that a randomly selected observation from the first group exceeds a randomly
 selected observation from the second group.
 
 For \code{response ~ group}, observations from the non-reference group constitute X,
@@ -92,7 +99,7 @@ at each threshold.
 
 When special_case = TRUE, the function additionally reports location-shift
 parameters under the assumption that \eqn{F_1(x) = F_2(x - \delta)}{F1(x) = F2(x - delta)}.
-Under this assumption, the discrimination test H0: AUC = 0.5 is mathematically
+Under this assumption, the discrimination test \eqn{\mathrm{H_0\colon AUC} = 0.5}{H0: AUC = 0.5} is mathematically
 equivalent to testing H0: \eqn{\delta = 0}{delta = 0} (zero location shift).
 In this special case, eAUC takes the dual role of both test statistic and effect size
 for the location difference.
@@ -103,13 +110,25 @@ If bootstrap resampling is selected, it is also used for constructing the
 confidence band for the ROC curve.
 
 \strong{Statistical Methodology:}
-Unlike standard implementations that assume the erroneously broad null hypothesis H0: F = G,
-this function derives p-values under the correct null hypothesis H0: AUC = 0.5
+Unlike standard implementations that assume the erroneously broad null hypothesis
+\eqn{\mathrm{H_0\colon F = G}}{H0: F = G},
+this function derives p-values under the correct null hypothesis
+\eqn{\mathrm{H_0\colon AUC} = 0.5}{H0: AUC = 0.5}
 that WMW actually tests. P-values are computed using asymptotic distribution
 theory with sample-size dependent bias corrections to maintain proper Type I
-error control under heteroskedasticity.
+error control under heteroskedasticity. Confidence intervals for the pseudomedian
+are obtained by inverting the test.
+}
+\note{
+Current implementation assumes continuous data without ties.
 }
 \examples{
+
+#############################################################################
+#
+library(wmwAUC)  
+#
+#############################################################################
 
 #############################################################################
 #
@@ -180,6 +199,73 @@ data(simulation2)  # List of eauc, pval_wt, pval_wmw
 hist(simulation2$eauc)
 hist(simulation2$pval_wmw)
 hist(simulation2$pval_wt)
+
+#############################################################################
+#
+# Simulation 3: confidence interval for pseudomedian derived under H0: AUC = 0.5   
+#               MC study of N = 500 replicas
+#               x ~ rnorm(300, 0,1)
+#               y ~ rlaplace(300, 0,1)
+#
+#############################################################################
+#
+# This simulation takes several minutes to complete
+\dontrun{
+
+if (!requireNamespace("VGAM", quietly = TRUE)) {
+install.packages("VGAM")
+}
+library('VGAM')
+N <- 500
+n_test <- 300
+
+set.seed(123L)
+wmw_ci = wt_ci = list(N)
+eauc = pseudomed = numeric(N)
+for (i in 1:N) {
+ #
+ x_test <- rnorm(n_test, 0, 1)
+ y_test <- VGAM::rlaplace(n_test, 0, 1)
+
+ wmw_test <- pseudomedian_ci(x_test, y_test, conf.level = 0.95)
+ wmw_ci[[i]] = wmw_test$conf.int
+ wt_test <- wilcox.test(x_test, y_test, conf.int = TRUE)
+ wt_ci[[i]] = wt_test$conf.int
+ eauc[i] = wt_test$statistic/(n_test*n_test)
+ pseudomed[i] = as.numeric(wt_test$estimate)
+ #  
+}
+
+wmw_ci = do.call(rbind, wmw_ci)
+wt_ci = do.call(rbind, wt_ci)
+colMeans(wmw_ci)
+colMeans(wt_ci)
+mean(eauc)
+
+# coverage
+length(which((wmw_ci[,1] < 0) & (wmw_ci[,2] > 0)))
+length(which((wt_ci[,1] < 0) & (wt_ci[,2] > 0)))
+
+mean(pseudomed)
+}
+
+data(simulation3)  # List of wmw_ci, wt_ci, eauc, pseudomedian
+# 
+# Average across MC of confidence intervals obtained under H0: AUC=0.5
+colMeans(simulation3$wmw_ci)
+# Average across MC of confidence intervals from wilcox.test()
+colMeans(simulation3$wt_ci)
+# 
+# Average across MC of eAUC
+mean(simulation3$eauc)
+
+# Coverage
+length(which((simulation3$wmw_ci[,1] < 0) & (simulation3$wmw_ci[,2] > 0)))
+length(which((simulation3$wt_ci[,1] < 0) & (simulation3$wt_ci[,2] > 0)))
+
+# Mean pseudomedian
+mean(simulation3$pseudomed)
+
 
 #############################################################################
 #
@@ -257,6 +343,10 @@ data(wesdr)
 da = wesdr
 da$ret = as.factor(da$ret)
 
+#############################################################################
+# WARNING: data with ties
+#          current version of wmwAUC does not take ties into account
+#############################################################################
 # WMW 
 wmd <- wmw_test(bmi ~ ret, data = da, ref_level = '0')
 wmd
@@ -325,9 +415,10 @@ of disagreement with stochastic dominance. The American Statistician, 1-13.
 Grendar, M. (2025). Wilcoxon-Mann-Whitney test of no group discrimination. arXiv:2511.20308.
 }
 \seealso{
-\code{\link{print.wmw_test}} for formated output of \code{\link{wilcox.test}}.
-\code{\link{plot.wmw_test}} for plot of output of  \code{\link{wilcox.test}}.
+\code{\link{print.wmw_test}} for formated output of \code{wmw_test()}.
+\code{\link{plot.wmw_test}} for plot of output of  \code{wmw_test()}.
 \code{\link{wmw_pvalue}} for details on computing p-values
+\code{\link{pseudomedian_ci}} for details on computing confidence intervals for pseudomedian
 \code{\link{quadruplot}} for exploratory data analysis plots that assist in evaluating location-shift assumption validity.
 \code{\link{wilcox.test}} for the underlying Wilcoxon-Mann-Whitney test.
 }

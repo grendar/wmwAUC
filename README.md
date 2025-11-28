@@ -89,15 +89,14 @@ Traditional p-values under $\mathrm{H_1}$ should concentrate near 0.
 
 <img src="man/figures/README-hist_sim1_3-1.png" width="50%" style="display: block; margin: auto;" />
 
-Correct p-values for testing $\mathrm{H_0: AUC = 0.5}$, based on
-([Grendár 2025](#ref-grendar2025wmw)).
+Correct p-values for testing $\mathrm{H_0\colon AUC = 0.5}$.
 
 ## Simulation 2
 
 The two zero-mean different-scale gaussians setting does not satisfy the
 traditional $\mathrm{H_1}$ of the stochastic dominance. But, as proved
 by Van Dantzig in 1951, WMW is consistent for broader
-$\mathrm{H_1}\textrm{:}\,\textrm{AUC} \neq 0.5$
+$\mathrm{H_1\colon\,\textrm{AUC} \neq 0.5$
 
 ``` r
 #############################################################################
@@ -133,6 +132,76 @@ data(simulation2)  # List of eauc, pval_wt, pval_wmw
 ```
 
 <img src="man/figures/README-hist_sim2-1.png" width="50%" style="display: block; margin: auto;" /><img src="man/figures/README-hist_sim2-2.png" width="50%" style="display: block; margin: auto;" /><img src="man/figures/README-hist_sim2-3.png" width="50%" style="display: block; margin: auto;" />
+
+## Simulation 3
+
+Confidence interval for the pseudomedian is obtained by inverting the
+test; see `pseudomedian_ci()` for implementation that handles the edge
+cases in the same way as `wilcox.test()`.
+
+In this simulation study, N = 500 MC replicates are created, of 300
+samples from the standard normal distribution and 300 samples from the
+Laplace distribution with location = 0, scale = 1. Properties of 95%
+confidence intervals obtained under H0: AUC = 0.5 are compared with
+those returned by `wilcox.test()`.
+
+``` r
+# #############################################################################
+# #
+# # Simulation 3: confidence interval for pseudomedian derived under H0: AUC = 0.5   
+# #               MC study of N = 500 replicas
+# #               x ~ rnorm(300, 0,1)
+# #               y ~ rlaplace(300, 0,1)
+# #
+# #############################################################################
+#
+#
+#
+# This simulation takes long time to complete
+# N <- 500
+# n_test <- 300
+#
+# set.seed(123L)
+# wmw_ci = wt_ci = list(N)
+# eauc = pseudomed = numeric(N)
+# for (i in 1:N) {
+#  #
+#  x_test <- rnorm(n_test, 0, 1)
+#  y_test <- VGAM::rlaplace(n_test, 0, 1)
+#
+#  wmw_test <- pseudomedian_ci(x_test, y_test, conf.level = 0.95)
+#  wmw_ci[[i]] = wmw_test$conf.int
+#  wt_test <- wilcox.test(x_test, y_test, conf.int = TRUE)
+#  wt_ci[[i]] = wt_test$conf.int
+#  eauc[i] = wt_test$statistic/(n_test*n_test)
+#  pseudomed[i] = as.numeric(wt_test$estimate)
+#  #  
+# }
+#
+#
+data(simulation3)  # List of wmw_ci, wt_ci, eauc, pseudomedian
+# 
+# Average across MC of confidence intervals obtained under H0: AUC=0.5
+colMeans(simulation3$wmw_ci)
+#> [1] -0.1701256  0.1735400
+# Average across MC of confidence intervals from wilcox.test()
+colMeans(simulation3$wt_ci)
+#> [1] -0.1754612  0.1790767
+# 
+# Average across MC of eAUC
+mean(simulation3$eauc)
+#> [1] 0.5004063
+ 
+# Coverage
+length(which((simulation3$wmw_ci[,1] < 0) & (simulation3$wmw_ci[,2] > 0)))
+#> [1] 470
+length(which((simulation3$wt_ci[,1] < 0) & (simulation3$wt_ci[,2] > 0)))
+#> [1] 473
+
+# Mean pseudomedian
+mean(simulation3$pseudomed)
+#> [1] 0.001776475
+```
 
 ## Example 1
 
@@ -218,7 +287,7 @@ conclude significant median difference despite identical medians
     #> Location-shift analysis (under F1(x) = F2(x - delta)):
     #> alternative hypothesis for location: two.sided 
     #> 95 percent confidence interval for median of all pairwise distances:
-    #>  -0.094 -0.016
+    #>  -0.101 -0.017
     #> Hodges-Lehmann median of all pairwise distances:
     #>  -0.048 [location effect size: eAUC = 0.370]
 
@@ -234,6 +303,9 @@ median(da$y[da$group == 'control'])
 ## Example 3
 
 WMW applied to another real-life data set.
+
+WARNING: the data contain ties. Current versio of wmwAUC package does
+not take ties into account.
 
 ``` r
 data(wesdr)
@@ -285,7 +357,7 @@ wml
 #> Location-shift analysis (under F1(x) = F2(x - delta)):
 #> alternative hypothesis for location: two.sided 
 #> 95 percent confidence interval for median of all pairwise distances:
-#>  0.000 1.100
+#>  0.025 1.054
 #> Hodges-Lehmann median of all pairwise distances:
 #>  0.600 [location effect size: eAUC = 0.547]
 ```

@@ -38,12 +38,29 @@
 #' observed differences between median-centered distributions exceed what would be 
 #' expected under the location-shift assumption.
 #' 
+#' 
+#' @note Uses \pkg{twosamples} for distribution comparison and 
+#' \code{KSd} from \pkg{sfsmisc} for exact confidence bands.
+#'   
+#'
 #' @examples
 #'
+#' library(wmwAUC)
+#' 
 #' data(Ex2)
 #' da <- Ex2
 #' qp = quadruplot(y ~ group, data = da, ref_level = 'control')
 #' qp
+#'
+#'
+#' @references 
+#' 
+#'   O'Dowd, C. (2025). Statistical Code Examples. 
+#'   \url{https://codowd.com/code} (accessed November 28, 2025).
+#'   
+#'    Maechler M (2024). _sfsmisc: Utilities from 'Seminar fuer Statistik' ETH
+#'    Zurich_. R package version 1.1-20,
+#'    <https://CRAN.R-project.org/package=sfsmisc>.
 #'
 #' @export
 quadruplot <- function(formula, data, 
@@ -162,7 +179,7 @@ quadruplot <- function(formula, data,
       ggplot2::aes(x = !!rlang::sym(what), color = !!rlang::sym(by), fill = !!rlang::sym(by)) +
       ggplot2::geom_density(alpha = 0.3) +
       ggplot2::facet_wrap(rlang::sym(by)) +
-      ggplot2::labs(y = 'Density') +
+      ggplot2::labs(y = 'Density', x = '') +
       ggplot2::theme(legend.position = if(show_legend) "right" else "none") +
       color_scale_color +
       color_scale_fill

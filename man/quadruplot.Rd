@@ -66,11 +66,26 @@ based on the Kolmogorov-Smirnov distribution. These bands help assess whether
 observed differences between median-centered distributions exceed what would be
 expected under the location-shift assumption.
 }
+\note{
+Uses \pkg{twosamples} for distribution comparison and
+\code{KSd} from \pkg{sfsmisc} for exact confidence bands.
+}
 \examples{
+
+library(wmwAUC)
 
 data(Ex2)
 da <- Ex2
 qp = quadruplot(y ~ group, data = da, ref_level = 'control')
 qp
 
+
+}
+\references{
+O'Dowd, C. (2025). Statistical Code Examples.
+\url{https://codowd.com/code} (accessed November 28, 2025).
+
+Maechler M (2024). \emph{sfsmisc: Utilities from 'Seminar fuer Statistik' ETH
+Zurich}. R package version 1.1-20,
+\url{https://CRAN.R-project.org/package=sfsmisc}.
 }

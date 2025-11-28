@@ -1,6 +1,6 @@
 #' P-value for Wilcoxon-Mann-Whitney Test of No Group Discrimination (Continuous Variables)
 #' 
-#' @description Tests \eqn{H0: \mathrm{AUC} = 0.5}{AUC = 0.5} vs \eqn{H1: \mathrm{AUC} \neq 0.5}{AUC != 0.5} 
+#' @description Tests \eqn{\mathrm{H_0\colon AUC} = 0.5}{AUC = 0.5} vs \eqn{\mathrm{H_1\colon AUC} \neq 0.5}{AUC != 0.5} 
 #' with proper finite-sample corrections
 #' 
 #' @param x numeric vector for first group
@@ -9,13 +9,13 @@
 #' @return p-value
 #' 
 #' @details Implements the bias-corrected variance estimator with second-order
-#'   U-statistic correction to provide honest p-values under H₀: AUC = 0.5.
-#'   Uses three-tier approach: permutation \eqn{(n < 20)}{(n < 20)}, 
-#'   bias-corrected \eqn{(20 \le n \lt 50)}{(20 <= n < 50)}, 
-#'   asymptotic with correction \eqn{n \ge 50}{(n >= 50)}.
+#' U-statistic correction to provide honest p-values under \eqn{\mathrm{H_0\colon AUC} = 0.5}{H₀: AUC = 0.5}.
+#' Uses three-tier approach: permutation \eqn{(n < 20)}{(n < 20)}, 
+#' bias-corrected \eqn{(20 \le n \lt 50)}{(20 <= n < 50)}, 
+#' asymptotic with correction \eqn{n \ge 50}{(n >= 50)}.
 #'   
-#' For medium samples, the naive variance estimators \eqn{\hat{\mathrm{Var}}(G(X))}{Var̂(G(X))} 
-#' and \eqn{\hat{\mathrm{Var}}(F(Y))}{Var̂(F(Y))} are 
+#' For medium samples, the naive variance estimators \eqn{\widehat{\mathrm{Var}}(G(X))}{Var̂(G(X))} 
+#' and \eqn{\widehat{\mathrm{Var}}(F(Y))}{Var̂(F(Y))} are 
 #' corrected by subtracting O(1/n) bias terms of the form 
 #' \eqn{(n_1 n_2)^{-1} \sum_i \hat{G}(X_i)(1 - \hat{G}(X_i))}
 #' to prevent variance underestimation that would inflate Type I error rates.
@@ -37,8 +37,11 @@ wmw_pvalue <- function(x, y, alternative = "two.sided") {
   }
   
   # Compute empirical AUC
-  auc_hat <- mean(outer(x, y, ">")) + 0.5 * mean(outer(x, y, "=="))
+  wt <- wilcox.test(x, y)
+  W <- wt$statistic
+  auc_hat <- as.numeric(W) / (n1 * n2)
   
+  # 
   # Small samples: use permutation test
   if (n < 20) {
     return(wmw_permutation_test(x, y, alternative))
@@ -116,18 +119,8 @@ wmw_pvalue <- function(x, y, alternative = "two.sided") {
   }
   
   return(p_value)
+  #  
   
-  #return(list(
-  #  statistic = c("T" = t_stat),
-  #  parameter = c("df" = df), 
-  #  p.value = p_value,
-  #  auc = auc_hat,
-  #  method = method,
-  #  data.name = paste(deparse(substitute(x)), "and", deparse(substitute(y))),
-  #  alternative = alternative,
-  #  sigma.sq = sigma_sq_final,
-  #  correction.factor = correction_factor
-  #))
 }
 
 

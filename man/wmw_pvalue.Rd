@@ -17,18 +17,18 @@ wmw_pvalue(x, y, alternative = "two.sided")
 p-value
 }
 \description{
-Tests \eqn{H0: \mathrm{AUC} = 0.5}{AUC = 0.5} vs \eqn{H1: \mathrm{AUC} \neq 0.5}{AUC != 0.5}
+Tests \eqn{\mathrm{H_0\colon AUC} = 0.5}{AUC = 0.5} vs \eqn{\mathrm{H_1\colon AUC} \neq 0.5}{AUC != 0.5}
 with proper finite-sample corrections
 }
 \details{
 Implements the bias-corrected variance estimator with second-order
-U-statistic correction to provide honest p-values under H₀: AUC = 0.5.
+U-statistic correction to provide honest p-values under \eqn{\mathrm{H_0\colon AUC} = 0.5}{H₀: AUC = 0.5}.
 Uses three-tier approach: permutation \eqn{(n < 20)}{(n < 20)},
 bias-corrected \eqn{(20 \le n \lt 50)}{(20 <= n < 50)},
 asymptotic with correction \eqn{n \ge 50}{(n >= 50)}.
 
-For medium samples, the naive variance estimators \eqn{\hat{\mathrm{Var}}(G(X))}{Var̂(G(X))} 
-and \eqn{\hat{\mathrm{Var}}(F(Y))}{Var̂(F(Y))} are
+For medium samples, the naive variance estimators \eqn{\widehat{\mathrm{Var}}(G(X))}{Var̂(G(X))} 
+and \eqn{\widehat{\mathrm{Var}}(F(Y))}{Var̂(F(Y))} are
 corrected by subtracting O(1/n) bias terms of the form
 \eqn{(n_1 n_2)^{-1} \sum_i \hat{G}(X_i)(1 - \hat{G}(X_i))}
 to prevent variance underestimation that would inflate Type I error rates.
