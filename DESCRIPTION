@@ -7,7 +7,7 @@ Authors@R:
            comment = c(ORCID = "0000-0002-6712-3457"))
 Description: Provides inference for the Wilcoxon-Mann-Whitney test under the null hypothesis
         H0: AUC = 0.5 for continuous random variables. Traditional implementations test
-        H0: F = G, which is inappropriately broad and leads to miscalibrated inference.
+        H0: F = G, which is inappropriately broad and leads to poorly calibrated inference.
 License: MIT + file LICENSE
 URL: https://github.com/grendar/wmwAUC
 BugReports: https://github.com/grendar/wmwAUC/issues

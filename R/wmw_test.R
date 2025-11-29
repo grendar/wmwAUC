@@ -124,6 +124,8 @@
 #'   #
 #' }
 #' }
+#' 
+#' if (FALSE) {
 #' data(simulation1)  # List eauc, pval_wt, pval_wmw
 #' # Empirical AUC centered at 0.5 despite F != G
 #' hist(simulation1$eauc)
@@ -131,6 +133,8 @@
 #' hist(simulation1$pval_wt) 
 #' # Correct p-values (correctly testing AUC = 0.5)  
 #' hist(simulation1$pval_wmw)
+#' }
+#' 
 #'  
 #' #############################################################################
 #' #
@@ -162,12 +166,14 @@
 #' }
 #' }
 #'
+#' if (FALSE) {
 #' data(simulation2)  # List of eauc, pval_wt, pval_wmw
 #' # WMW detects broader alternatives than traditional stochastic dominance
 #' hist(simulation2$eauc)
 #' hist(simulation2$pval_wmw)
 #' hist(simulation2$pval_wt)
-#'
+#' }
+#'   
 #' #############################################################################
 #' #
 #' # Simulation 3: confidence interval for pseudomedian derived under H0: AUC = 0.5   
@@ -218,6 +224,8 @@
 #' mean(pseudomed)
 #' }
 #'
+#'
+#' if (FALSE) {
 #' data(simulation3)  # List of wmw_ci, wt_ci, eauc, pseudomedian
 #' # 
 #' # Average across MC of confidence intervals obtained under H0: AUC=0.5
@@ -234,7 +242,7 @@
 #' 
 #' # Mean pseudomedian
 #' mean(simulation3$pseudomed)
-#'
+#' }
 #'
 #' #############################################################################
 #' #
@@ -242,6 +250,7 @@
 #' #
 #' #############################################################################
 #' #
+#' if (FALSE) {
 #' if (!requireNamespace("gemR", quietly = TRUE)) {
 #' install.packages("gemR")
 #' }
@@ -264,13 +273,16 @@
 #' qp <- quadruplot(P19099 ~ MS, data = df, ref_level = 'no')
 #' qp
 #' # => location shift assumption is not valid
-#'
+#' }
+#' 
+#' 
 #' #############################################################################
 #' #
 #' # Ex 2
 #' #
 #' #############################################################################
 #' #
+#' if (FALSE) {
 #' data(Ex2)
 #' da <- Ex2
 #'
@@ -295,7 +307,7 @@
 #' wml <- wmw_test(y ~ group, data = da, special_case = TRUE,
 #'                 ref_level = 'control')
 #' wml
-#'
+#' }
 #'
 #' #############################################################################
 #' #
@@ -303,6 +315,7 @@
 #' #
 #' #############################################################################
 #' #
+#' if (FALSE) {
 #' if (!requireNamespace("gss", quietly = TRUE)) {
 #' install.packages("gss")
 #' }
@@ -334,7 +347,7 @@
 #' })                 
 #' wml
 #' plot(wml)
-#'
+#' }
 #' 
 #' 
 #'
