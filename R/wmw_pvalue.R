@@ -11,7 +11,7 @@
 #' @details Implements the bias-corrected variance estimator with second-order
 #' U-statistic correction to provide honest p-values under \eqn{\mathrm{H_0\colon AUC} = 0.5}{H₀: AUC = 0.5}.
 #' Uses three-tier approach: permutation \eqn{(n < 20)}{(n < 20)}, 
-#' bias-corrected \eqn{(20 \le n \lt 50)}{(20 <= n < 50)}, 
+#' bias-corrected \eqn{(20 \le n < 50)}{(20 <= n < 50)}, 
 #' asymptotic with correction \eqn{n \ge 50}{(n >= 50)}.
 #'   
 #' For medium samples, the naive variance estimators \eqn{\widehat{\mathrm{Var}}(G(X))}{Var̂(G(X))} 

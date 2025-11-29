@@ -9,15 +9,14 @@ Description: Provides inference for the Wilcoxon-Mann-Whitney test under the nul
         H0: AUC = 0.5 for continuous random variables. Traditional implementations test
         H0: F = G, which is inappropriately broad and leads to miscalibrated inference.
 License: MIT + file LICENSE
+URL: https://github.com/grendar/wmwAUC
+BugReports: https://github.com/grendar/wmwAUC/issues
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
-Depends: R (>= 4.2.0)
-Comment: AI-assisted code generation via Claude Pro by Anthropic was
-        used in development. All generated content was verified,
-        tested, and enhanced by the package author.
+Depends: R (>= 4.0.0)
 Suggests: testthat (>= 3.0.0), ggsci, viridis,
         gemR, gss, knitr, rmarkdown, ggbeeswarm,
         ggplot2, qqplotr, rlang, twosamples,
-        patchwork, sfsmisc, stats
+        patchwork, sfsmisc, stats, VGAM
 Config/testthat/edition: 3

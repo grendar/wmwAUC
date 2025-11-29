@@ -137,7 +137,7 @@ library(wmwAUC)
 #############################################################################
 #
 # This simulation takes several minutes to complete
-\dontrun{
+if (FALSE)  {
 N = 10000
 n = 1000
 set.seed(123L)
@@ -172,7 +172,7 @@ hist(simulation1$pval_wmw)
 #############################################################################
 #
 # This simulation takes several minutes to complete
-\dontrun{
+if (FALSE) {
 N = 10000
 n = 1000
 set.seed(123L)
@@ -209,8 +209,8 @@ hist(simulation2$pval_wt)
 #
 #############################################################################
 #
-# This simulation takes several minutes to complete
-\dontrun{
+# This simulation takes long time to complete
+if (FALSE) {
 
 if (!requireNamespace("VGAM", quietly = TRUE)) {
 install.packages("VGAM")
@@ -235,7 +235,7 @@ for (i in 1:N) {
  pseudomed[i] = as.numeric(wt_test$estimate)
  #  
 }
-
+ 
 wmw_ci = do.call(rbind, wmw_ci)
 wt_ci = do.call(rbind, wt_ci)
 colMeans(wmw_ci)

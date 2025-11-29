@@ -304,7 +304,7 @@ median(da$y[da$group == 'control'])
 
 WMW applied to another real-life data set.
 
-WARNING: the data contain ties. Current versio of wmwAUC package does
+WARNING: the data contain ties. Current version of wmwAUC package does
 not take ties into account.
 
 ``` r
@@ -364,6 +364,12 @@ wml
 
 Plot
 <img src="man/figures/README-plot_ex3-1.png" width="100%" style="display: block; margin: auto;" />
+
+# Acknowledgements
+
+AI-assisted code generation via Claude Pro by Anthropic was used in
+development. All generated content was verified, tested, and enhanced by
+the package author.
 
 # References
 
