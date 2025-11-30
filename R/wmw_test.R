@@ -513,10 +513,29 @@ wmw_test <- function(formula,
   
   # To get correct confint for HL pseudomedian
   # by inverting the test
-  p_median =  pseudomedian_ci(x_vals, y_vals, conf.level = conf_level, n_grid = 1000) 
-  wtest$conf.int = p_median$conf.int
-  wtest$estimate = p_median$estimate
-  wtest$conf.level = p_median$conf.level
+  if (special_case == TRUE) {
+    #
+    if(n1 < 20 || n2 < 20) {
+      warning("Small sample sizes (n1=", n1, ", n2=", n2, ") detected.\n",
+              "Computing exact pseudomedian CI requires permutation tests\n", 
+              "for each grid point (~100 points × 2000 permutations).\n",
+              "This may take several minutes.",
+              call. = FALSE, immediate. = TRUE)
+    }
+    #    
+    p_median <-  pseudomedian_ci(x_vals, y_vals, conf.level = conf_level, n_grid = 1000) 
+    wtest$conf.int <- p_median$conf.int
+    wtest$estimate <- p_median$estimate
+    wtest$conf.level <- p_median$conf.level
+    #
+  } else {
+    #
+    p_median <-  NULL
+    wtest$conf.int <- NULL
+    wtest$estimate <- NULL
+    wtest$conf.level <- NULL
+    #
+  }
 
 
   ##############################################################################

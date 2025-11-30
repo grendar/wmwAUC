@@ -7,9 +7,9 @@
 wmw_pvalue(x, y, alternative = "two.sided")
 }
 \arguments{
-\item{x}{numeric vector for first group}
+\item{x}{Numeric vector of cases/group 1 values}
 
-\item{y}{numeric vector for second group}
+\item{y}{Numeric vector of controls/reference group values}
 
 \item{alternative}{character: "two.sided", "greater", or "less"}
 }
@@ -32,4 +32,8 @@ and \eqn{\widehat{\mathrm{Var}}(F(Y))}{Var̂(F(Y))} are
 corrected by subtracting O(1/n) bias terms of the form
 \eqn{(n_1 n_2)^{-1} \sum_i \hat{G}(X_i)(1 - \hat{G}(X_i))}
 to prevent variance underestimation that would inflate Type I error rates.
+
+Function assumes x represents cases and y represents the reference level,
+in accord with \code{wmw_test()}.
+Internal calculations convert to P(X < Y) framework to match theoretical derivations.
 }

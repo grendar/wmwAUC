@@ -3,8 +3,8 @@
 #' @description Tests \eqn{\mathrm{H_0\colon AUC} = 0.5}{AUC = 0.5} vs \eqn{\mathrm{H_1\colon AUC} \neq 0.5}{AUC != 0.5} 
 #' with proper finite-sample corrections
 #' 
-#' @param x numeric vector for first group
-#' @param y numeric vector for second group  
+#' @param x Numeric vector of cases/group 1 values
+#' @param y Numeric vector of controls/reference group values  
 #' @param alternative character: "two.sided", "greater", or "less"
 #' @return p-value
 #' 
@@ -19,6 +19,10 @@
 #' corrected by subtracting O(1/n) bias terms of the form 
 #' \eqn{(n_1 n_2)^{-1} \sum_i \hat{G}(X_i)(1 - \hat{G}(X_i))}
 #' to prevent variance underestimation that would inflate Type I error rates.
+#'
+#' Function assumes x represents cases and y represents the reference level, 
+#' in accord with `wmw_test()`. 
+#' Internal calculations convert to P(X < Y) framework to match theoretical derivations.
 #'
 #' @export
 wmw_pvalue <- function(x, y, alternative = "two.sided") {
@@ -39,7 +43,7 @@ wmw_pvalue <- function(x, y, alternative = "two.sided") {
   # Compute empirical AUC
   wt <- wilcox.test(x, y)
   W <- wt$statistic
-  auc_hat <- as.numeric(W) / (n1 * n2)
+  auc_hat <- 1 - as.numeric(W) / (n1 * n2)  # asymptotics in preprint is for P(X < Y)
   
   # 
   # Small samples: use permutation test
@@ -127,9 +131,15 @@ wmw_pvalue <- function(x, y, alternative = "two.sided") {
 
 # Placeholder for permutation test (for n < 20)
 wmw_permutation_test <- function(x, y, alternative) {
-  # Simple permutation test implementation
-  observed_auc <- mean(outer(x, y, ">")) + 0.5 * mean(outer(x, y, "=="))
   
+  # eAUC
+  n1 <- length(x)
+  n2 <- length(y)
+  #
+  wt <- wilcox.test(x, y)
+  W <- wt$statistic  
+  observed_auc <- 1 - as.numeric(W) / (n1 * n2)
+
   # Permutation distribution under H₀: AUC = 0.5
   pooled <- c(x, y)
   n1 <- length(x)
@@ -139,7 +149,13 @@ wmw_permutation_test <- function(x, y, alternative) {
     perm_indices <- sample(length(pooled))
     perm_x <- pooled[perm_indices[1:n1]]
     perm_y <- pooled[perm_indices[(n1+1):(n1+n2)]]
-    mean(outer(perm_x, perm_y, ">")) + 0.5 * mean(outer(perm_x, perm_y, "=="))
+    #
+    wt <- wilcox.test(perm_x, perm_y)
+    W <- wt$statistic  
+    perm_auc <- 1 - as.numeric(W) / (n1 * n2)
+    #    
+    return(perm_auc)
+    #
   })
   
   # P-value calculation
@@ -151,15 +167,7 @@ wmw_permutation_test <- function(x, y, alternative) {
     p_value <- mean(perm_aucs <= observed_auc)
   }
   
-  return(list(
-    statistic = c("AUC" = observed_auc),
-    parameter = NULL,
-    p.value = p_value,
-    auc = observed_auc,
-    method = "Honest WMW test (permutation)",
-    alternative = alternative,
-    sigma.sq = NA,
-    correction.factor = NA
-  ))
+  return(p_value)
+  
 }
 

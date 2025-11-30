@@ -45,6 +45,7 @@ pseudomedian_ci <- function(x, y, conf.level = 0.95, n_grid = 1000) {
   delta_grid <- seq(delta_min, delta_max, length.out = n_grid)
   
   # Test H0: AUC = 0.5 for each shifted sample using wmw_pvalue()
+  #  
   p_values <- sapply(delta_grid, function(delta) {
     y_shifted <- y + delta
     wmw_pvalue(x, y_shifted, alternative = "two.sided")
