@@ -22,8 +22,8 @@ unnecessarily restrictive; WMW is consistent against the broader
 alternative $\mathrm{H_1\colon AUC \neq 0.5}$, as established by Van
 Dantzig (1951). We provide theoretical framework and implementation
 consistent with what the WMW eAUC statistic actually computes, including
-tie-corrected asymptotics and finite-sample bias corrections. See
-([Grendár 2025](#ref-grendar2025wmw)).
+tie-corrected asymptotics and finite-sample bias corrections. For
+detalis, see ([Grendár 2025](#ref-grendar2025wmw)).
 
 The primary goal of wmwAUC is to provide inferences for the
 Wilcoxon-Mann-Whitney test of $\mathrm{H_0\colon AUC = 0.5}$.
@@ -86,7 +86,7 @@ data(simulation1)  # List eauc, pval_wt, pval_wmw
 
 <img src="man/figures/README-hist_sim1_1-1.png" width="50%" style="display: block; margin: auto;" />
 
-Empirical AUC centered at 0.5 despite $\mathrm{F \neq G}$
+Empirical AUC centered at 0.5 despite $\mathrm{F \neq G}$.
 
 <img src="man/figures/README-hist_sim1_2-1.png" width="50%" style="display: block; margin: auto;" />
 
@@ -210,7 +210,7 @@ mean(simulation3$pseudomed)
 
 ## Example 1
 
-Real data analyzed by WMW test of no group discrimination
+Real data analyzed by WMW test of no group discrimination.
 
 ``` r
 data(gemR::MS)
@@ -272,10 +272,10 @@ wmd
 ### Check location-shift assumption with EDA
 
 <img src="man/figures/README-quadruplot_Ex2-1.png" width="100%" style="display: block; margin: auto;" />
-**location-shift assumption not tenable**.
+location-shift assumption not tenable.
 
-*Erroneous* use of location-shift special case of WMW would falsely
-conclude significant median difference despite identical medians
+Erroneous use of location-shift special case of WMW would falsely
+conclude significant median difference despite identical medians.
 
     #> 
     #>         Wilcoxon-Mann-Whitney Test of No Group Discrimination
@@ -337,7 +337,7 @@ wmd
 ### EDA to assess location shift assumption validity
 
 <img src="man/figures/README-quadruplot_Ex3-1.png" width="100%" style="display: block; margin: auto;" />
-hence, **location shift assumption is tenable**
+hence, location shift assumption is tenable.
 
 ### Special case of WMW test
 

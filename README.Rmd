@@ -53,7 +53,7 @@ stochastic dominance is unnecessarily restrictive; WMW is consistent against the
 broader alternative $\mathrm{H_1\colon AUC \neq 0.5}$, as established by Van Dantzig (1951).
 We provide theoretical framework and implementation consistent with what the WMW eAUC 
 statistic actually computes, including tie-corrected asymptotics and finite-sample 
-bias corrections. See [@grendar2025wmw].
+bias corrections. For detalis, see [@grendar2025wmw].
 
 The primary goal of wmwAUC is to provide inferences for the Wilcoxon-Mann-Whitney test
 of $\mathrm{H_0\colon AUC = 0.5}$. 
@@ -110,7 +110,7 @@ data(simulation1)  # List eauc, pval_wt, pval_wmw
 hist(simulation1$eauc)
 ```
 
-Empirical AUC centered at 0.5 despite $\mathrm{F \neq G}$
+Empirical AUC centered at 0.5 despite $\mathrm{F \neq G}$.
 
 ```{r, hist_sim1_2, fig.width=5, fig.height=5, include=T, fig.align='center', fig.show='hold', out.width = "50%", echo = FALSE}
 hist(simulation1$pval_wt) 
@@ -238,7 +238,7 @@ mean(simulation3$pseudomed)
 
 ## Example 1
 
-Real data analyzed by WMW test of no group discrimination 
+Real data analyzed by WMW test of no group discrimination. 
 
 ```{r example1}
 data(gemR::MS)
@@ -288,10 +288,10 @@ qp <- quadruplot(y ~ group, data = da, ref_level = 'control')
 qp
 # => location-shift assumption not tenable
 ```
-**location-shift assumption not tenable**.
+location-shift assumption not tenable.
 
 
-*Erroneous* use of location-shift special case of WMW would falsely conclude significant median difference despite identical medians
+Erroneous use of location-shift special case of WMW would falsely conclude significant median difference despite identical medians.
 ```{r plot_example2, fig.width=10, fig.height=10, include=T, fig.align='center', fig.show='hold', out.width = "100%", echo = FALSE}
 # Erroneous use of location-shift special case would falsely 
 # conclude significant median difference despite identical medians
