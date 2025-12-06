@@ -13,6 +13,11 @@
 
 \item{...}{Additional arguments (not currently used)}
 }
+\value{
+Invisibly returns the input object \code{x} (of class "wmw_test").
+Called primarily for side effects to print a formatted summary
+of the Wilcoxon-Mann-Whitney test results to the console.
+}
 \description{
 Prints summary of Wilcoxon-Mann-Whitney discrimination test results.
 }

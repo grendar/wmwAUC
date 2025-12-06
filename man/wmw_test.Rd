@@ -130,150 +130,6 @@ library(wmwAUC)
 #
 #############################################################################
 
-#############################################################################
-#
-# Simulation 1: H0: F=G is erroneously too broad
-#
-#############################################################################
-#
-# This simulation takes several minutes to complete
-if (FALSE)  {
-N = 10000
-n = 1000
-set.seed(123L)
-pval_wt = pval_wmw = eauc = numeric(N)
-for (i in 1:N) {
-#
-  x = rnorm(n, sd = 0.1)
-  y = rnorm(n, sd = 3)
-  # wilcox.test() of H0: F = G
-  wt = wilcox.test(x, y)
-  pval_wt[i] = wt$p.value
-  # wmw_test() of H0: AUC = 0.5
-  pval_wmw[i] = wmw_pvalue(x, y)
-  # eAUC
-  eauc[i] = wt$statistic/(n*n)
-  #
-}
-}
-
-if (FALSE) {
-data(simulation1)  # List eauc, pval_wt, pval_wmw
-# Empirical AUC centered at 0.5 despite F != G
-hist(simulation1$eauc)
-# Traditional p-values (incorrectly testing F = G)
-hist(simulation1$pval_wt) 
-# Correct p-values (correctly testing AUC = 0.5)  
-hist(simulation1$pval_wmw)
-}
-
- 
-#############################################################################
-#
-# Simulation 2: H1: F stoch. dominates G is erroneously too narrow
-#               WMW is consistent for broader H1: AUC != 0.5   
-#
-#############################################################################
-#
-# This simulation takes several minutes to complete
-if (FALSE) {
-N = 10000
-n = 1000
-set.seed(123L)
-pval_wt = pval_wmw = eauc = numeric(N)
-for (i in 1:N) {
-#
-  # gaussians with different location and scale
-  # does not satisfy stochastic dominance
-  x = rnorm(n, 0, sd = 0.1)
-  y = rnorm(n, 0.5, sd = 3)
-  # wilcox.test H0: F = G vs H1: (F stochastically dominates G) OR (G stochastically dominates F)
-  wt = wilcox.test(x, y)
-  pval_wt[i] = wt$p.value
-  # wmw_test H0: AUC = 0.5 vs H1: AUC neq 0.5
-  pval_wmw[i] = wmw_pvalue(x, y)
-  # eAUC
-  eauc[i] = wt$statistic/(n*n)
-#
-}
-}
-
-if (FALSE) {
-data(simulation2)  # List of eauc, pval_wt, pval_wmw
-# WMW detects broader alternatives than traditional stochastic dominance
-hist(simulation2$eauc)
-hist(simulation2$pval_wmw)
-hist(simulation2$pval_wt)
-}
-  
-#############################################################################
-#
-# Simulation 3: confidence interval for pseudomedian derived under H0: AUC = 0.5   
-#               MC study of N = 500 replicas
-#               x ~ rnorm(300, 0,1)
-#               y ~ rlaplace(300, 0,1)
-#
-#############################################################################
-#
-# This simulation takes long time to complete
-if (FALSE) {
-
-if (!requireNamespace("VGAM", quietly = TRUE)) {
-install.packages("VGAM")
-}
-library('VGAM')
-N <- 500
-n_test <- 300
-
-set.seed(123L)
-wmw_ci = wt_ci = list(N)
-eauc = pseudomed = numeric(N)
-for (i in 1:N) {
- #
- x_test <- rnorm(n_test, 0, 1)
- y_test <- VGAM::rlaplace(n_test, 0, 1)
-
- wmw_test <- pseudomedian_ci(x_test, y_test, conf.level = 0.95)
- wmw_ci[[i]] = wmw_test$conf.int
- wt_test <- wilcox.test(x_test, y_test, conf.int = TRUE)
- wt_ci[[i]] = wt_test$conf.int
- eauc[i] = wt_test$statistic/(n_test*n_test)
- pseudomed[i] = as.numeric(wt_test$estimate)
- #  
-}
- 
-wmw_ci = do.call(rbind, wmw_ci)
-wt_ci = do.call(rbind, wt_ci)
-colMeans(wmw_ci)
-colMeans(wt_ci)
-mean(eauc)
-
-# coverage
-length(which((wmw_ci[,1] < 0) & (wmw_ci[,2] > 0)))
-length(which((wt_ci[,1] < 0) & (wt_ci[,2] > 0)))
-
-mean(pseudomed)
-}
-
-
-if (FALSE) {
-data(simulation3)  # List of wmw_ci, wt_ci, eauc, pseudomedian
-# 
-# Average across MC of confidence intervals obtained under H0: AUC=0.5
-colMeans(simulation3$wmw_ci)
-# Average across MC of confidence intervals from wilcox.test()
-colMeans(simulation3$wt_ci)
-# 
-# Average across MC of eAUC
-mean(simulation3$eauc)
-
-# Coverage
-length(which((simulation3$wmw_ci[,1] < 0) & (simulation3$wmw_ci[,2] > 0)))
-length(which((simulation3$wt_ci[,1] < 0) & (simulation3$wt_ci[,2] > 0)))
-
-# Mean pseudomedian
-mean(simulation3$pseudomed)
-}
 
 #############################################################################
 #
@@ -281,7 +137,7 @@ mean(simulation3$pseudomed)
 #
 #############################################################################
 #
-if (FALSE) {
+\donttest{
 if (!requireNamespace("gemR", quietly = TRUE)) {
 install.packages("gemR")
 }
@@ -306,14 +162,13 @@ qp
 # => location shift assumption is not valid
 }
 
-
 #############################################################################
 #
 # Ex 2
 #
 #############################################################################
 #
-if (FALSE) {
+\donttest{
 data(Ex2)
 da <- Ex2
 
@@ -323,7 +178,7 @@ wmd
 plot(wmd)
 
 # Check location-shift assumption with EDA
-qp <- quadruplot(y ~ group, data = da, ref_level = 'control')
+qp <- quadruplot(y ~ group, data = da, ref_level = 'control', test = 'ks')
 qp
 # => location-shift assumption not tenable
 
@@ -338,46 +193,6 @@ median(da$y[da$group == 'control'])
 wml <- wmw_test(y ~ group, data = da, special_case = TRUE,
                 ref_level = 'control')
 wml
-}
-
-#############################################################################
-#
-# Ex 3
-#
-#############################################################################
-#
-if (FALSE) {
-if (!requireNamespace("gss", quietly = TRUE)) {
-install.packages("gss")
-}
-library('gss')
-
-data(wesdr)
-da = wesdr
-da$ret = as.factor(da$ret)
-
-#############################################################################
-# WARNING: data with ties
-#          current version of wmwAUC does not take ties into account
-#############################################################################
-# WMW 
-wmd <- wmw_test(bmi ~ ret, data = da, ref_level = '0')
-wmd
-plot(wmd)
-
-
-# EDA to assess location shift assumption validity
-qp <- quadruplot(bmi ~ ret, data = da, ref_level = '0')
-qp
-# => location shift assumption is tenable
-
-# Special case of WMW test
-suppressWarnings({ # ties in data
-wml <- wmw_test(bmi ~ ret, data = da, ref_level = '0', 
-                ci_method = 'boot', special_case = TRUE)
-})                 
-wml
-plot(wml)
 }
 
 

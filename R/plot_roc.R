@@ -3,6 +3,10 @@
 #' @param x Object of class `roc_ci` returned by `roc_with_ci()`
 #' @param ... not used
 #' 
+#' @return No return value, called for side effects. Creates an ROC curve plot 
+#' showing the receiver operating characteristic with AUC information 
+#' and confidence intervals if available.
+#' 
 #' @keywords internal
 #' @export
 plot_roc = function(x, ...) {

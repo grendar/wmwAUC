@@ -9,19 +9,24 @@ Variables)
 <!-- badges: start -->
 <!-- badges: end -->
 
-The traditional WMW null hypothesis
-$\mathrm{H_0}\textrm{:}\,\mathrm{F = G}$ is erroneously too broad. WMW
-actually tests narrower $\mathrm{H_0}\textrm{:}\,\textrm{AUC} = 0.5$.
-Asymptotic distribution of the standardized $U$ statistic (i.e., the
-empirical AUC) under the correct $\mathrm{H_0}$ is derived along with
-finite sample bias corrections. The traditional alternative hypothesis
-of stochastic dominance is too narrow. WMW is consistent against
-$\mathrm{H_1}\textrm{:}\,\mathrm{AUC} \neq 0.5$, as established by Van
-Dantzig in 1951. See ([Grendár 2025](#ref-grendar2025wmw)).
+Statistical theory incorrectly states that the Wilcoxon-Mann-Whitney
+(WMW) test examines $\mathrm{H_0\colon F = G}$. We demonstrate this
+theoretical claim is untenable: the WMW statistic, when standardized, is
+the empirical AUC (eAUC), which measures $P(X < Y)$ and cannot detect
+distributional equality. Through Monte Carlo analysis of zero-mean
+heteroscedastic Gaussians and corresponding asymptotic theory, we show
+that WMW tests $\mathrm{H_0\colon AUC = 0.5}$ (no systematic
+discrimination) rather than distributional equality. Moreover, the
+traditional alternative hypothesis of stochastic dominance is
+unnecessarily restrictive; WMW is consistent against the broader
+alternative $\mathrm{H_1\colon AUC \neq 0.5}$, as established by Van
+Dantzig (1951). We provide theoretical framework and implementation
+consistent with what the WMW eAUC statistic actually computes, including
+tie-corrected asymptotics and finite-sample bias corrections. See
+([Grendár 2025](#ref-grendar2025wmw)).
 
 The primary goal of wmwAUC is to provide inferences for the
-Wilcoxon-Mann-Whitney test of
-$\mathrm{H_0}\textrm{:}\,\mathrm{AUC} = 0.5$.
+Wilcoxon-Mann-Whitney test of $\mathrm{H_0\colon AUC = 0.5}$.
 
 ## Installation
 
@@ -34,8 +39,8 @@ devtools::install_github('grendar/wmwAUC')
 ## Simulation 1
 
 Consider the setting of two zero-mean different-scale gaussians. Then
-the traditional $\mathrm{H_0}\textrm{:}\,\mathrm{F = G}$ of WMW test is
-false and $\mathrm{H_1}\textrm{:}\,\mathrm{F \neq G}$ holds.
+the traditional $\mathrm{H_0\colon F = G}$ of WMW test is false and
+$\mathrm{H_0\colon F \neq G}$ holds.
 
 The Monte Carlo simulation demonstrates that the normalized test
 statistic $U/(n_1n_2)$ which is just eAUC, concentrates asymptotically
@@ -44,11 +49,11 @@ on 0.5 - the value expected under a true null hypothesis.
 If WMW tested distributional equality, the test statistic should not
 concentrate on its null value when distributions clearly differ.
 
-Also note that under $\mathrm{H_1}\textrm{:}\,\mathrm{F \neq G}$,
-p-values should concentrate near zero, yet the observed distribution is
-nearly uniform with a slightly elevated first bins, consistent with
-testing a true null hypothesis ($\mathrm{AUC = 0.5}$) using
-miscalibrated variance estimation.
+Also note that under $\mathrm{H_0\colon F \neq G}$, p-values should
+concentrate near zero, yet the observed distribution is nearly uniform
+with a slightly elevated first bins, consistent with testing a true null
+hypothesis ($\mathrm{H_0\colon AUC = 0.5}$) using miscalibrated variance
+estimation.
 
 ``` r
 #############################################################################
@@ -96,7 +101,7 @@ Correct p-values for testing $\mathrm{H_0\colon AUC = 0.5}$.
 The two zero-mean different-scale gaussians setting does not satisfy the
 traditional $\mathrm{H_1}$ of the stochastic dominance. But, as proved
 by Van Dantzig in 1951, WMW is consistent for broader
-$\mathrm{H_1\colon\,\textrm{AUC} \neq 0.5}$
+$\mathrm{H_1\colon AUC \neq 0.5}$.
 
 ``` r
 #############################################################################

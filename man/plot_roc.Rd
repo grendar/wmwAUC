@@ -11,6 +11,11 @@ plot_roc(x, ...)
 
 \item{...}{not used}
 }
+\value{
+No return value, called for side effects. Creates an ROC curve plot
+showing the receiver operating characteristic with AUC information
+and confidence intervals if available.
+}
 \description{
 ROC plot with confidence band -- internal function
 }

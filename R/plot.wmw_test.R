@@ -15,6 +15,10 @@
 #'   (TRUE) or list of individual plots (FALSE). Only relevant when special_case = TRUE
 #' @param ... Additional arguments (not currently used)
 #'
+#' @return No return value, called for side effects. Creates a plot visualizing  
+#' the Wilcoxon-Mann-Whitney test results including distributions,  
+#' test statistic, and confidence information.
+#'
 #'
 #' @importFrom stats as.formula
 #' 

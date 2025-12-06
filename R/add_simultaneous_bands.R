@@ -7,6 +7,9 @@
 #' @param ref_level character giving the reference level of group factor
 #' @param alpha size of test (0.05) used to provide confidence level
 #'
+#' @return No return value, called for side effects. Adds simultaneous confidence bands
+#' to an existing plot using sfsmisc functionality.
+#'
 #' @keywords internal
 #' @export
 add_simultaneous_bands_sfsmisc <- function(p, data, response_col, group_col, ref_level = NULL, alpha = 0.05) {
@@ -65,6 +68,13 @@ add_simultaneous_bands_sfsmisc <- function(p, data, response_col, group_col, ref
 #' @param alpha size of test; hence confidence level is 1 - alpha
 #' 
 #' @importFrom stats ecdf pt
+#'
+#' @return
+#' A list containing simultaneous confidence band information with components:
+#' \item{lower}{Numeric vector of lower confidence bounds}
+#' \item{upper}{Numeric vector of upper confidence bounds}  
+#' \item{x}{Numeric vector of x-coordinates for the bands}
+#' \item{alpha}{Confidence level used for band construction}
 #'
 #' @keywords internal
 #' @export

@@ -13,6 +13,15 @@ test_shift_equivalence(x, y, test = "ks")
 
 \item{test}{one of c("ks", "kuiper", "cvm", "ad", "wass", "dts")}
 }
+\value{
+A list of class "shift_test" containing:
+\item{statistic}{Test statistic value}
+\item{p.value}{P-value of the shift equivalence test}
+\item{method}{Character string describing the test method}
+\item{alternative}{Character string describing the alternative hypothesis}
+\item{data.name}{Character string with the names of the data}
+\item{assumptions_met}{Logical indicating if shift equivalence assumptions are satisfied}
+}
 \description{
 Applies a specified test from \code{twosamples} library to median-centered data.
 }

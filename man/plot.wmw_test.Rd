@@ -14,6 +14,11 @@
 
 \item{...}{Additional arguments (not currently used)}
 }
+\value{
+No return value, called for side effects. Creates a plot visualizing
+the Wilcoxon-Mann-Whitney test results including distributions,
+test statistic, and confidence information.
+}
 \description{
 Creates empirical ROC curve plot with test results (p-value, eAUC with confidence
 interval) displayed in subtitle. If \code{ci_method = 'boot'} was used in \code{wmw_test()},

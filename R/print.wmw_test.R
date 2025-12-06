@@ -6,6 +6,10 @@
 #' @param digits Integer, number of digits to display for numeric results (default: 4)
 #' @param ... Additional arguments (not currently used)
 #'
+#' @return Invisibly returns the input object \code{x} (of class "wmw_test"). 
+#' Called primarily for side effects to print a formatted summary 
+#' of the Wilcoxon-Mann-Whitney test results to the console.
+#'
 #' @export
 print.wmw_test <- function(x, digits = 3, ...) {
 

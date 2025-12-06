@@ -26,6 +26,10 @@ add_simultaneous_bands_sfsmisc(
 
 \item{alpha}{size of test (0.05) used to provide confidence level}
 }
+\value{
+No return value, called for side effects. Adds simultaneous confidence bands
+to an existing plot using sfsmisc functionality.
+}
 \description{
 Adds simultaneous confidence band to ECDF using sfsmisc
 }

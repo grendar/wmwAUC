@@ -11,6 +11,13 @@ calc_simultaneous_ecdf_bands_sfsmisc(x, alpha = 0.05)
 
 \item{alpha}{size of test; hence confidence level is 1 - alpha}
 }
+\value{
+A list containing simultaneous confidence band information with components:
+\item{lower}{Numeric vector of lower confidence bounds}
+\item{upper}{Numeric vector of upper confidence bounds}
+\item{x}{Numeric vector of x-coordinates for the bands}
+\item{alpha}{Confidence level used for band construction}
+}
 \description{
 Confidence bands for ECDF using sfsmisc::KSd
 }

@@ -55,12 +55,12 @@
 #'
 #' @references 
 #' 
-#'   O'Dowd, C. (2025). Statistical Code Examples. 
-#'   \url{https://codowd.com/code} (accessed November 28, 2025).
+#' O'Dowd, C. (2025). Statistical Code Examples. 
+#' \url{https://codowd.com/code} (accessed November 28, 2025).
 #'   
-#'    Maechler M (2024). _sfsmisc: Utilities from 'Seminar fuer Statistik' ETH
-#'    Zurich_. R package version 1.1-20,
-#'    <https://CRAN.R-project.org/package=sfsmisc>.
+#' Maechler M (2024). _sfsmisc: Utilities from 'Seminar fuer Statistik' ETH
+#' Zurich_. R package version 1.1-20,
+#' <https://CRAN.R-project.org/package=sfsmisc>.
 #'
 #' @export
 quadruplot <- function(formula, data, 
@@ -204,10 +204,6 @@ quadruplot <- function(formula, data,
 
   # Helper function to create median-centered wormplot without confidence bands
   create_centered_wormplot <- function(data, what, by, distribution, show_colors, color_scale_color, show_legend) {
-    # Temporarily suppress warnings for qqplotr
-    old_warn <- getOption("warn")
-    options(warn = -1)
-    on.exit(options(warn = old_warn))
 
     # Center both groups by their medians
     data_centered <- data
