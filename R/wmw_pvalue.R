@@ -8,7 +8,7 @@
 #' @param alternative character: "two.sided", "greater", or "less"
 #' @return p-value
 #' 
-#' @details Implements the bias-corrected variance estimator with second-order
+#' @details Implements the Bias-Corrected (BC) variance estimator with second-order
 #' U-statistic correction to provide honest p-values under \eqn{\mathrm{H_0\colon AUC} = 0.5}{H₀: AUC = 0.5}.
 #' Uses three-tier approach: permutation \eqn{(n < 20)}{(n < 20)}, 
 #' bias-corrected \eqn{(20 \le n < 50)}{(20 <= n < 50)}, 
@@ -20,8 +20,8 @@
 #' \eqn{(n_1 n_2)^{-1} \sum_i \hat{G}(X_i)(1 - \hat{G}(X_i))}
 #' to prevent variance underestimation that would inflate Type I error rates.
 #'
-#' Function assumes x represents cases and y represents the reference level, 
-#' in accord with `wmw_test()`. 
+#' Function assumes \eqn{x} represents cases and \eqn{y} represents the reference level, 
+#' in accord with `wilcox.test()` and `wmw_test()`. 
 #' Internal calculations convert to P(X < Y) framework to match theoretical derivations.
 #'
 #' @export
@@ -41,10 +41,16 @@ wmw_pvalue <- function(x, y, alternative = "two.sided") {
   }
   
   # Compute empirical AUC
-  wt <- wilcox.test(x, y)
-  W <- wt$statistic
-  auc_hat <- 1 - as.numeric(W) / (n1 * n2)  # asymptotics in preprint is for P(X < Y)
-  
+  # To get eAUC 
+  pooled <- c(x, y)
+  # compute eAUC
+  ranks <- rank(pooled)
+  rank_sum <- sum(ranks[1:n1])
+  # Convert to Mann-Whitney U
+  U_statistic <- rank_sum - n1 * (n1 + 1) / 2
+  Ahat <- U_statistic/(n1*n2) # P(X>Y)
+  auc_hat <- 1 - Ahat  # since asymptotics in preprint is for P(X < Y)
+
   # 
   # Small samples: use permutation test
   if (n < 20) {
@@ -127,35 +133,36 @@ wmw_pvalue <- function(x, y, alternative = "two.sided") {
   
 }
 
-
-
 # Placeholder for permutation test (for n < 20)
+# Permutation test completely independent of wilcox.test()
 wmw_permutation_test <- function(x, y, alternative) {
   
-  # eAUC
-  n1 <- length(x)
-  n2 <- length(y)
-  #
-  wt <- wilcox.test(x, y)
-  W <- wt$statistic  
-  observed_auc <- 1 - as.numeric(W) / (n1 * n2)
-
-  # Permutation distribution under H₀: AUC = 0.5
-  pooled <- c(x, y)
   n1 <- length(x)
   n2 <- length(y)
   
+  # Helper function to compute AUC using ranking (fast & handles ties)
+  compute_auc_ranking <- function(x_vals, y_vals) {
+    pooled <- c(x_vals, y_vals)
+    ranks <- rank(pooled)
+    rank_sum <- sum(ranks[1:length(x_vals)])
+    W <- rank_sum - length(x_vals) * (length(x_vals) + 1) / 2
+    auc <- W / (length(x_vals) * length(y_vals))  # P(X > Y)
+    return(1 - auc)  # Convert to P(X < Y) for theory consistency
+  }
+  
+  # Observed AUC
+  observed_auc <- compute_auc_ranking(x, y)
+  
+  # Permutation distribution under H₀: AUC = 0.5
+  pooled <- c(x, y)
+  n_total <- length(pooled)
+  
   perm_aucs <- replicate(2000, {
-    perm_indices <- sample(length(pooled))
+    perm_indices <- sample(n_total)
     perm_x <- pooled[perm_indices[1:n1]]
-    perm_y <- pooled[perm_indices[(n1+1):(n1+n2)]]
-    #
-    wt <- wilcox.test(perm_x, perm_y)
-    W <- wt$statistic  
-    perm_auc <- 1 - as.numeric(W) / (n1 * n2)
-    #    
-    return(perm_auc)
-    #
+    perm_y <- pooled[perm_indices[(n1+1):n_total]]
+    
+    return(compute_auc_ranking(perm_x, perm_y))
   })
   
   # P-value calculation
@@ -168,6 +175,4 @@ wmw_permutation_test <- function(x, y, alternative) {
   }
   
   return(p_value)
-  
 }
-

@@ -4,7 +4,7 @@
 \alias{pseudomedian_ci}
 \title{Confidence Interval for Hodges-Lehmann Pseudomedian via Test Inversion}
 \usage{
-pseudomedian_ci(x, y, conf.level = 0.95, n_grid = 1000)
+pseudomedian_ci(x, y, conf.level = 0.95, pvalue_method = "EU", n_grid = 1000)
 }
 \arguments{
 \item{x}{numeric vector, first sample}
@@ -12,6 +12,8 @@ pseudomedian_ci(x, y, conf.level = 0.95, n_grid = 1000)
 \item{y}{numeric vector, second sample}
 
 \item{conf.level}{confidence level (default 0.95)}
+
+\item{pvalue_method}{character, either 'EU' or 'BC'}
 
 \item{n_grid}{number of grid points for search (default 1000)}
 }

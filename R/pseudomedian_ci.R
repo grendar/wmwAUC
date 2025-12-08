@@ -6,6 +6,7 @@
 #' @param x numeric vector, first sample
 #' @param y numeric vector, second sample  
 #' @param conf.level confidence level (default 0.95)
+#' @param pvalue_method character, either 'EU' or 'BC'
 #' @param n_grid number of grid points for search (default 1000)
 #' @return list with conf.int, estimate and conf.level
 #' 
@@ -15,7 +16,9 @@
 #' @importFrom stats var
 #' 
 #' @export
-pseudomedian_ci <- function(x, y, conf.level = 0.95, n_grid = 1000) {
+pseudomedian_ci <- function(x, y, conf.level = 0.95, 
+                            pvalue_method = 'EU',
+                            n_grid = 1000) {
   
   # Input validation
   if (!is.numeric(x) || !is.numeric(y)) {
@@ -44,12 +47,37 @@ pseudomedian_ci <- function(x, y, conf.level = 0.95, n_grid = 1000) {
   # Grid of candidate pseudomedian values
   delta_grid <- seq(delta_min, delta_max, length.out = n_grid)
   
-  # Test H0: AUC = 0.5 for each shifted sample using wmw_pvalue()
-  #  
-  p_values <- sapply(delta_grid, function(delta) {
-    y_shifted <- y + delta
-    wmw_pvalue(x, y_shifted, alternative = "two.sided")
-  })
+  # Test H0: AUC = 0.5 for each shifted sample 
+  # 
+  n1 = length(x)
+  n2 = length(y)
+  n_kernel_evals <- n1 * n2
+  total_computations <- n_kernel_evals * n_grid
+  if (total_computations > 1e6) {
+    warning(sprintf(
+      "Large computational load detected: %dx%d = %s kernel evaluations x %d grid points = %s total computations. Consider reducing n_grid for faster execution.",
+      n1, n2, 
+      format(n_kernel_evals, big.mark = ","),
+      n_grid,
+      format(total_computations, big.mark = ",")
+    ), call. = FALSE, immediate. = TRUE)
+  }  
+
+  if (pvalue_method == 'BC') { # using wmw_pvalue()
+   #    
+    p_values <- sapply(delta_grid, function(delta) {
+      y_shifted <- y + delta
+      wmw_pvalue(x, y_shifted, alternative = "two.sided")
+    })
+    #
+  } else { # EU -> using wmw_pvalue_ties()
+    #
+    p_values <- sapply(delta_grid, function(delta) {
+      y_shifted <- y + delta
+      suppressWarnings(wmw_pvalue_ties(x, y_shifted, alternative = "two.sided"))
+    })
+    #
+  }
   
   # Find confidence interval endpoints
   accepted <- delta_grid[p_values >= alpha]
@@ -66,70 +94,5 @@ pseudomedian_ci <- function(x, y, conf.level = 0.95, n_grid = 1000) {
     estimate = pseudomedian_est,
     conf.level = conf.level
   )
-}
-
-#' Test H0: AUC = 0.5 (wilcox.test-style edge case handling)
-#' 
-#' Test for AUC = 0.5 following wilcox.test edge case philosophy
-#' 
-#' @param x first sample
-#' @param y second sample
-#' @return p-value for testing H0: AUC = 0.5
-test_auc_half <- function(x, y) {
-  
-  n1 <- length(x)
-  n2 <- length(y)
-  n <- n1 + n2
-  
-  # Input validation (like wilcox.test)
-  if (n1 < 1 || n2 < 1) {
-    stop("not enough observations")
-  }
-  
-  # Compute empirical AUC using wilcox.test() statistic (consistent with wmwAUC)
-  wt_stat <- wilcox.test(x, y, exact = FALSE)$statistic
-  auc_emp <- as.numeric(wt_stat) / (n1 * n2)
-  
-  # Placement values: G(X_i) and F(Y_j)
-  G_at_X <- sapply(x, function(xi) mean(y <= xi))
-  F_at_Y <- sapply(y, function(yj) mean(x <= yj))
-  
-  # Simple variance estimates (no bias correction)
-  var_G_X <- var(G_at_X)
-  var_F_Y <- var(F_at_Y) 
-  
-  # Sample proportion
-  lambda_n <- n1 / n
-  
-  # Asymptotic variance under H0: AUC = 0.5
-  sigma2 <- var_G_X / lambda_n + var_F_Y / (1 - lambda_n)
-  
-  # Edge case handling inspired by wilcox.test:
-  # Use mathematical approach, not conservative p=1.0
-  if (sigma2 <= 1e-12) {
-    # When empirical variance is essentially zero,
-    # use the general asymptotic variance formula with empirical estimates
-    
-    # Under general H0: AUC = 0.5, asymptotic variance is:
-    # σ² = Var(G(X))/λ + Var(F(Y))/(1-λ)
-    # When both are degenerate, fall back to simple test based on AUC distance
-    
-    z_stat <- abs(auc_emp - 0.5) * sqrt(12 * n1 * n2 / (n1 + n2))
-    return(2 * (1 - pnorm(abs(z_stat))))
-  }
-  
-  # Normal case: use empirical variance estimate
-  z_stat <- sqrt(n) * (auc_emp - 0.5) / sqrt(sigma2)
-  
-  # Two-sided p-value
-  p_value <- 2 * (1 - pnorm(abs(z_stat)))
-  
-  # Never return exactly 1.0 unless mathematically justified
-  # (wilcox.test only returns 1.0 for trivial cases like n=1 vs n=1)
-  if (p_value > 0.999999 && n1 > 1 && n2 > 1) {
-    p_value <- 0.999999
-  }
-  
-  return(p_value)
 }
 

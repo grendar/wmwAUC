@@ -44,7 +44,6 @@
 #'   
 #'
 #' @examples
-#'
 #' library(wmwAUC)
 #' 
 #' data(Ex2)
@@ -73,7 +72,6 @@ quadruplot <- function(formula, data,
                        show_colors = TRUE,
                        show_legend = TRUE) {
 
-  test <- match.arg(test)
   
   # Input validation
   vars <- all.vars(formula)
@@ -91,7 +89,15 @@ quadruplot <- function(formula, data,
     stop(paste("Variable", by, "not found in data."))
   }
   
+  if (is.null(ref_level)) {
+    stop(paste("ref_level must be provided!"))
+  }
 
+  if (!test %in% c('ks', 'kuiper', 'cvm', 'ad', 'wass' ,'dts')) {
+    stop(paste("test must be one of 'ks', 'kuiper', 'cvm', 'ad', 'wass' ,'dts'"))
+  }
+  
+  
   # Check required packages
   required_pkgs <- c("ggplot2", "rlang", "ggbeeswarm", "qqplotr")
   missing_pkgs <- required_pkgs[!sapply(required_pkgs, requireNamespace, quietly = TRUE)]
@@ -233,7 +239,11 @@ quadruplot <- function(formula, data,
   }
 
   # 3. Median-centered wormplot (location shift assessment)
-  ggw_centered <- create_centered_wormplot(data, what, by, distribution, show_colors, color_scale_color, show_legend) +
+  ggw_centered <- create_centered_wormplot(data = data, what = what, by = by, 
+                                           distribution = distribution, 
+                                           show_colors = show_colors, 
+                                           color_scale_color = color_scale_color, 
+                                           show_legend = show_legend) +
     ggplot2::labs(x = "Theoretical Quantiles", y = "Detrended Sample Quantiles",
                   title = 'Wormplots of Median-Centered Data')# "Location Shift Assessment")
 
@@ -248,7 +258,7 @@ quadruplot <- function(formula, data,
   data_centered <- data
   groups <- unique(data[[by]])
   for (g in groups) {
-    idx <- da[[by]] == g
+    idx <- data[[by]] == g
     data_centered[idx, what] <- data[idx, what] - median(data[idx, what], na.rm = TRUE)
   }
   #
@@ -268,7 +278,7 @@ quadruplot <- function(formula, data,
       ggplot2::theme(legend.position = if(show_legend) "bottom" else "none") +
       color_scale_color
   } else {
-    ggcdf <- ggp_base +
+    ggcdf <- ggp_base_centered +
       ggplot2::aes(x = !!rlang::sym(what)) +
       ggplot2::stat_ecdf(linewidth = 1) +
       ggplot2::facet_wrap(rlang::sym(by)) +
@@ -321,7 +331,7 @@ quadruplot <- function(formula, data,
   ##############################################################################
   #
   # add_simultaneous_bands function using sfsmisc
-  #
+  # 
   ##############################################################################
   #
   add_simultaneous_bands_sfsmisc <- function(p, data, response_col, group_col, ref_level = NULL, alpha = 0.05) {
@@ -335,9 +345,11 @@ quadruplot <- function(formula, data,
     groups <- unique(data[[group_col]])
     for (g in groups) {
       idx <- data[[group_col]] == g
-      data_centered[idx, response_col] <- data[idx, response_col] - median(data[idx, response_col], na.rm = TRUE)
+      medi <- median(data[idx, response_col], na.rm = TRUE)
+      data_centered[idx, response_col] <- data[idx, response_col] - medi
     }
-    
+
+    # Calculate bands using MEDIAN-CENTERED data and sfsmisc
     # Calculate bands using MEDIAN-CENTERED data and sfsmisc
     all_bands <- data.frame()
     
@@ -345,8 +357,15 @@ quadruplot <- function(formula, data,
       group_data <- data_centered[data_centered[[group_col]] == g, response_col]
       group_data <- group_data[!is.na(group_data)]
       
-      # Calculate simultaneous bands using sfsmisc::approx.ksD
+      # Store the original median that was subtracted for centering
+      original_median <- median(data[data[[group_col]] == g, response_col], na.rm = TRUE)
+      
+      # Calculate simultaneous bands using sfsmisc (on centered data)
       bands <- calc_simultaneous_ecdf_bands_sfsmisc(group_data, alpha)
+      
+      # UN-CENTER: Add back the median to position bands on original scale
+      # bands$x <- bands$x + original_median
+      
       bands$group <- g
       bands$is_ref <- (g == ref_level)
       
@@ -381,13 +400,13 @@ quadruplot <- function(formula, data,
   #
   ##############################################################################
   #
-  values <- data[[what]]  #ta[[response_var]]
-  groups <- data[[by]]  #ta[[group_var]]
+  values <- data[[what]]  
+  groups <- data[[by]]  
   #
   x_vals <- values[groups != ref_level]    # cases
   y_vals <- values[groups ==  ref_level]   # controls
   #
-  test_loc = test_shift_equivalence(x_vals, y_vals, test = test)
+  test_loc = test_shift_equivalence(x_vals, y_vals, test = test) # internally de-centers by medians
   #
   ##########################################################
   #

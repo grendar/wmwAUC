@@ -21,7 +21,7 @@ Tests \eqn{\mathrm{H_0\colon AUC} = 0.5}{AUC = 0.5} vs \eqn{\mathrm{H_1\colon AU
 with proper finite-sample corrections
 }
 \details{
-Implements the bias-corrected variance estimator with second-order
+Implements the Bias-Corrected (BC) variance estimator with second-order
 U-statistic correction to provide honest p-values under \eqn{\mathrm{H_0\colon AUC} = 0.5}{H₀: AUC = 0.5}.
 Uses three-tier approach: permutation \eqn{(n < 20)}{(n < 20)},
 bias-corrected \eqn{(20 \le n < 50)}{(20 <= n < 50)},
@@ -33,7 +33,7 @@ corrected by subtracting O(1/n) bias terms of the form
 \eqn{(n_1 n_2)^{-1} \sum_i \hat{G}(X_i)(1 - \hat{G}(X_i))}
 to prevent variance underestimation that would inflate Type I error rates.
 
-Function assumes x represents cases and y represents the reference level,
-in accord with \code{wmw_test()}.
+Function assumes \eqn{x} represents cases and \eqn{y} represents the reference level,
+in accord with \code{wilcox.test()} and \code{wmw_test()}.
 Internal calculations convert to P(X < Y) framework to match theoretical derivations.
 }

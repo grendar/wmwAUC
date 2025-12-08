@@ -2,7 +2,7 @@
 % Please edit documentation in R/wmw_test.R
 \name{wmw_test}
 \alias{wmw_test}
-\title{Wilcoxon-Mann-Whitney Test of No Group Discrimination  (Continuous Variables)}
+\title{Wilcoxon-Mann-Whitney Test of No Group Discrimination}
 \usage{
 wmw_test(
   formula,
@@ -10,12 +10,10 @@ wmw_test(
   ref_level = NULL,
   special_case = FALSE,
   alternative = c("two.sided", "greater", "less"),
+  pvalue_method = "EU",
   ci_method = "hanley",
   conf_level = 0.95,
-  exact = NULL,
-  correct = TRUE,
-  tol_root = 1e-04,
-  digits_rank = Inf,
+  n_grid = 100,
   ...
 )
 }
@@ -30,17 +28,13 @@ wmw_test(
 
 \item{alternative}{Character, alternative hypothesis is c("two.sided", "greater", "less")}
 
+\item{pvalue_method}{Character, method ('EU', 'BC') used for computing p-values; 'BC' assumes continuous data (default 'EU')}
+
 \item{ci_method}{Character, confidence interval method for eAUC: c('hanley', 'boot', 'none')}
 
 \item{conf_level}{Numeric, confidence level for intervals (default 0.95)}
 
-\item{exact}{Logical, passed to \code{wilcox.test()}  for exact p-values (default NULL)}
-
-\item{correct}{Logical, passed to \code{wilcox.test()} for continuity correction (default TRUE)}
-
-\item{tol_root}{Numeric, passed to \code{wilcox.test()} for root tolerance (default 1e-4)}
-
-\item{digits_rank}{Numeric, passed to \code{wilcox.test()} for ranking precision (default Inf)}
+\item{n_grid}{Numeric, number of grid points for search in \code{pseudomedian_ci()} (default 100)}
 
 \item{...}{Additional arguments passed to \code{roc_with_ci()}}
 }
@@ -48,19 +42,18 @@ wmw_test(
 Object of class 'wmw_test' containing:
 \item{special_case}{Logical indicating whether special case (location-shift) analysis was performed}
 \item{n}{Named vector with components n1, n2 giving sample sizes for each group}
-\item{statistic}{W statistic returned by \code{wilcox.test}}
-\item{p.value}{P-value for testing H0: AUC = 0.5}
-\item{alternative}{Alternative hypothesis specification used in \code{wilcox.test}}
-\item{method}{Character string describing the test method}
-\item{data.name}{Character string giving the name of the data}
-\item{estimate}{Hodges-Lehmann median difference estimate (when special_case = TRUE)}
-\item{conf.int}{Confidence interval for the location shift (when special_case = TRUE)}
-\item{conf.level}{Confidence level for the confidence interval for HL estimator (when special_case = TRUE)}
-\item{null.value}{Null hypothesis value (mu = 0 for location shift)}
+\item{U_statistic}{U statistic}
+\item{p_value}{P-value for testing H0: AUC = 0.5}
+\item{alternative}{Alternative hypothesis specification}
+\item{pvalue_method}{Character string describing the test method}
+\item{data_name}{Character string giving the name of the data}
+\item{pseudomedian}{Hodges-Lehmann median difference estimate (when special_case = TRUE)}
+\item{pseudomedian_conf_int}{Confidence interval for the location shift (when special_case = TRUE)}
+\item{pseudomedian_conf_level}{Confidence level for the confidence interval for HL estimator (when special_case = TRUE)}
 \item{ci_method}{Method used to compute confidence interval for AUC}
 \item{roc_object}{ROC analysis object returned by \code{roc_with_ci} function}
-\item{auc}{Empirical AUC (eAUC) calculated from Wilcoxon W statistic}
-\item{auc.conf.int}{Confidence interval for true AUC using Hanley-McNeil or bootstrap method}
+\item{auc}{Empirical AUC (eAUC), the standardized U statistic}
+\item{auc_conf_int}{Confidence interval for true AUC using Hanley-McNeil or bootstrap method}
 \item{x_vals}{Numeric vector of observations from non-reference group}
 \item{y_vals}{Numeric vector of observations from reference group}
 \item{groups}{Character vector of group labels from original data}
@@ -74,23 +67,17 @@ against \eqn{\mathrm{H_1\colon AUC} \neq 0.5}{H1: AUC != 0.5}.
 Under location-shift assumption, equivalently tests zero location difference.
 }
 \details{
-Constructs confidence intervals for the pseudomedian via test inversion.
-Under location-shift assumptions (\eqn{G(x) = F(x - \delta)}), the pseudomedian
-represents the location difference between groups.
-
-Derived under \eqn{\mathrm{H_0\colon AUC} = 0.5}{H0: AUC = 0.5}.
-
 The function tests the null hypothesis \eqn{\mathrm{H_0\colon AUC} = 0.5}{H0: AUC = 0.5}
 against \eqn{\mathrm{H_0\colon AUC} \neq 0.5}{H1: AUC != 0.5},
-where AUC represents the Area Under the ROC Curve and equals the probability
-\eqn{P(X > Y)} that a randomly selected observation from the first group exceeds a randomly
+where AUC represents the Area Under the ROC Curve and  - following the convention of \code{wilcox.test()} -
+equals the probability \eqn{P(X > Y)} that a randomly selected observation from the first group exceeds a randomly
 selected observation from the second group.
 
-For \code{response ~ group}, observations from the non-reference group constitute X,
-while observations from the reference group (specified by \code{ref_level}) constitute Y.
+For \code{response ~ group}, observations from the non-reference group constitute \eqn{X},
+while observations from the reference group (specified by \code{ref_level}) constitute \eqn{Y}.
 Thus AUC = P(non-reference > reference). If \code{ref_level} is not specified, the first
-factor level is used as reference. The W statistic from \code{\link{wilcox.test}} and the
-resulting empirical AUC (eAUC) are calculated consistently with this group assignment.
+factor level is used as reference. The U statistic and the resulting empirical AUC (eAUC)
+are calculated consistently with this group assignment.
 
 The test statistic is eAUC, which estimates the true AUC.
 The empirical ROC curve (eROC) is constructed by varying the classification
@@ -109,85 +96,70 @@ McNeil (1982) method based on asymptotic normality, or bootstrap resampling.
 If bootstrap resampling is selected, it is also used for constructing the
 confidence band for the ROC curve.
 
+The function uses \verb{Exact Unbiased} ('EU') method for computing p-values that can handle any type
+of data (continuous, discrete, mixed). The \code{Bias-Corrected} ('BC') method that requires continuous data
+is provided through \code{pvalue_method = 'BC'} option.
+
+Constructs confidence intervals for the pseudomedian via test inversion.
+Under location-shift assumptions (\eqn{G(x) = F(x - \delta)}), the pseudomedian
+represents the location difference between groups.
+
 \strong{Statistical Methodology:}
 Unlike standard implementations that assume the erroneously broad null hypothesis
 \eqn{\mathrm{H_0\colon F = G}}{H0: F = G},
 this function derives p-values under the correct null hypothesis
 \eqn{\mathrm{H_0\colon AUC} = 0.5}{H0: AUC = 0.5}
 that WMW actually tests. P-values are computed using asymptotic distribution
-theory with sample-size dependent bias corrections to maintain proper Type I
-error control under heteroskedasticity. Confidence intervals for the pseudomedian
+theory with two methods of finite-sample bias corrections:
+\enumerate{
+\item Exact Unbiased ('EU') estimation of variance of eAUC which handles any type of data
+(continuous, discrete, mixed);
+\item Bias Correction ('BC') sample-size dependent method
+to maintain proper Type I error control. Confidence intervals for the pseudomedian
 are obtained by inverting the test.
 }
-\note{
-Current implementation assumes continuous data without ties.
 }
 \examples{
-
-#############################################################################
-#
 library(wmwAUC)  
-#
-#############################################################################
-
-
-#############################################################################
-#
 # Ex 1
-#
-#############################################################################
-#
 \donttest{
 if (!requireNamespace("gemR", quietly = TRUE)) {
 install.packages("gemR")
 }
 library('gemR')
-
 data(MS)
 da <- MS
-
 # preparing data frame
 class(da$proteins) <- setdiff(class(da$proteins), "AsIs")
 df <- as.data.frame(da$proteins)
 df$MS <- da$MS
-
 # WMW test 
 wmd <- wmw_test(P19099 ~ MS, data = df, ref_level = 'no')
 wmd
 plot(wmd)
-
 # EDA to assess location shift assumption validity
 qp <- quadruplot(P19099 ~ MS, data = df, ref_level = 'no')
 qp
 # => location shift assumption is not valid
 }
 
-#############################################################################
-#
 # Ex 2
-#
-#############################################################################
-#
 \donttest{
 data(Ex2)
 da <- Ex2
-
 # WMW test
 wmd <- wmw_test(y ~ group, data = da, ref_level = 'control')
 wmd
 plot(wmd)
-
 # Check location-shift assumption with EDA
 qp <- quadruplot(y ~ group, data = da, ref_level = 'control', test = 'ks')
 qp
 # => location-shift assumption not tenable
-
 # Note that medians are essentially the same:
 median(da$y[da$group == 'case'])
 # 0.495
 median(da$y[da$group == 'control'])
 # 0.493
-
 # Erroneous use of location-shift special case would falsely 
 # conclude significant median difference despite identical medians
 wml <- wmw_test(y ~ group, data = da, special_case = TRUE,
@@ -195,6 +167,29 @@ wml <- wmw_test(y ~ group, data = da, special_case = TRUE,
 wml
 }
 
+# Ex 3
+\donttest{
+if (!requireNamespace("gss", quietly = TRUE)) {
+install.packages("gss")
+}
+library('gss')
+data(wesdr)
+da = wesdr
+da$ret = as.factor(da$ret)
+# WMW 
+wmd <- wmw_test(bmi ~ ret, data = da, ref_level = '0')
+wmd
+plot(wmd)
+# EDA to assess location shift assumption validity
+qp <- quadruplot(bmi ~ ret, data = da, ref_level = '0')
+qp
+# => location shift assumption is tenable
+# Special case of WMW test
+wml <- wmw_test(bmi ~ ret, data = da, ref_level = '0', 
+                ci_method = 'boot', special_case = TRUE)
+wml
+plot(wml)
+} 
 
 
 }
@@ -245,8 +240,9 @@ Grendar, M. (2025). Wilcoxon-Mann-Whitney test of no group discrimination. arXiv
 \seealso{
 \code{\link{print.wmw_test}} for formated output of \code{wmw_test()}.
 \code{\link{plot.wmw_test}} for plot of output of  \code{wmw_test()}.
-\code{\link{wmw_pvalue}} for details on computing p-values
+\code{\link{wmw_pvalue}} for details on computing p-values in the continuous case ('BC')
+\code{\link{wmw_pvalue_ties}} for details on computing p-values in the 'EU' mode
 \code{\link{pseudomedian_ci}} for details on computing confidence intervals for pseudomedian
 \code{\link{quadruplot}} for exploratory data analysis plots that assist in evaluating location-shift assumption validity.
-\code{\link{wilcox.test}} for the underlying Wilcoxon-Mann-Whitney test.
+\code{\link{wilcox.test}} for Wilcoxon-Mann-Whitney test in base R.
 }

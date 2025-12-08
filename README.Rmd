@@ -1,6 +1,6 @@
 ---
 output: github_document
-title: 'Wilcoxon-Mann-Whitney Test of No Group Discrimination (Continuous Variables)'
+title: 'Wilcoxon-Mann-Whitney Test of No Group Discrimination'
 bibliography: inst/refs.bib
 link-citations: true
 ---
@@ -56,7 +56,40 @@ statistic actually computes, including tie-corrected asymptotics and finite-samp
 bias corrections. For detalis, see [@grendar2025wmw].
 
 The primary goal of wmwAUC is to provide inferences for the Wilcoxon-Mann-Whitney test
-of $\mathrm{H_0\colon AUC = 0.5}$. 
+of $\mathrm{H_0\colon AUC = 0.5}$. Besides the asymtotic inferences the library provides
+two variants of finite-sample bias correction:
+
+- *Exact Unbiased* (EU) Method: Universal approach handling data with arbitrary tie patterns 
+through the mid-rank kernel and exact finite-sample unbiased variance estimation from Hoeffding decomposition theory.  Reduces correctly to the continuous case when no ties are present.
+
+- *Bias-Corrected* (BC) Method: Alternative for continuous data without ties, 
+using individual component bias correction with $O(n^{-1})$ finite-sample corrections and 
+Welch-Satterthwaite degrees of freedom. Assumes continuous distributions with no ties.
+
+The EU method serves as the default implementation, providing:
+
+- Universal applicability (handles any data type - continuous, discrete, or mixed)
+
+- Exact finite-sample unbiasedness (not asymptotic approximation)  
+
+- Theoretically principled tie handling through mid-rank kernel
+
+
+The BC method is available for users specifically working with continuous data 
+or requiring compatibility with traditional variance estimation approaches.
+
+Key functions include:
+
+- `wmw_test()`: Main testing function using EU methodology with option to use BC method for continuous-only data
+
+- `wmw_pvalue()`: WMW AUC p-values for continuous data, based on the BC method
+
+- `wmw_pvalue_ties()`: WMW AUC p-values for any type of data, based on the EU method
+
+- `pseudomedian_ci()`: Confidence intervals for Hodges-Lehmann pseudomedian
+
+- `quadruplot()`: Diagnostics for location shift assumption
+
 
 ## Installation
 
@@ -91,7 +124,7 @@ Also note that under $\mathrm{H_0\colon F \neq G}$, p-values should concentrate 
 # pval_wt = pval_wmw = eauc = numeric(N)
 # for (i in 1:N) {
 #
-#  x = rnorm(n, sd = 0.1)
+#   x = rnorm(n, sd = 0.1)
 #   y = rnorm(n, sd = 3)
 #   # wilcox.test() of H0: F = G
 #   wt = wilcox.test(x, y)
@@ -207,7 +240,7 @@ are compared with those returned by `wilcox.test()`.
 #  x_test <- rnorm(n_test, 0, 1)
 #  y_test <- VGAM::rlaplace(n_test, 0, 1)
 #
-#  wmw_test <- pseudomedian_ci(x_test, y_test, conf.level = 0.95)
+#  wmw_test <- pseudomedian_ci(x_test, y_test, conf.level = 0.9, pvalue_method = 'BC')
 #  wmw_ci[[i]] = wmw_test$conf.int
 #  wt_test <- wilcox.test(x_test, y_test, conf.int = TRUE)
 #  wt_ci[[i]] = wt_test$conf.int
@@ -311,10 +344,6 @@ median(da$y[da$group == 'control'])
 
 WMW applied to another real-life data set.
 
-WARNING: the data contain ties. Current version of wmwAUC package does not take
-ties into account.
-
-
 ```{r Ex3}
 data(wesdr)
 da = wesdr
@@ -340,10 +369,8 @@ hence, location shift assumption is tenable.
 
 ### Special case of WMW test
 ```{r Ex3_contd}
-suppressWarnings({ # ties in data
 wml <- wmw_test(bmi ~ ret, data = da, ref_level = '0', 
-                 ci_method = 'boot', special_case = TRUE)
-})                 
+                 ci_method = 'boot', special_case = TRUE, n_grid = 100)
 wml
 ```
 

@@ -40,11 +40,11 @@ plot.wmw_test <- function(x, combine_plots = TRUE, ...) {
   #
   # Add AUC annotation
   auc_text <- paste0(", eAUC = ", round(x$auc, 3))
-  if (!is.null(x$auc.conf.int)) {
+  if (!is.null(x$auc_conf_int)) {
     auc_text <- paste0('WMW p-value ',
-                       ifelse(x$p.value < 0.001, "< 0.001", paste0('= ', formatC(x$p.value, format = "f", digits = 3))),
-                auc_text, " (95% CI: [", round(x$auc.conf.int[1], 3),
-                       ", ", round(x$auc.conf.int[2], 3), "])")
+                       ifelse(x$p_value < 0.001, "< 0.001", paste0('= ', formatC(x$p_value, format = "f", digits = 3))),
+                auc_text, " (95% CI: [", round(x$auc_conf_int[1], 3),
+                       ", ", round(x$auc_conf_int[2], 3), "])")
   }
   roc_plot <- roc_plot + ggplot2::labs(title = 'eROC', subtitle = auc_text)
   #
@@ -82,11 +82,11 @@ plot.wmw_test <- function(x, combine_plots = TRUE, ...) {
     #                        ifelse(x$p.value < 0.001, "< 0.001", paste0('= ', formatC(x$p.value, format = "f", digits = 3))), '\n')
     #
     wmw_test_text = paste0('WMW p-value ',
-                           ifelse(x$p.value < 0.001, "< 0.001", paste0('= ', formatC(x$p.value, format = "f", digits = 3))))
+                           ifelse(x$p_value < 0.001, "< 0.001", paste0('= ', formatC(x$p_value, format = "f", digits = 3))))
     auc_text <- paste0(". Effect size: eAUC = ", round(x$auc, 3))
     if (!is.null(x$auc.conf.int)) {
-      auc_text <- paste0(auc_text, " (95% CI: [", round(x$auc.conf.int[1], 3),
-                         ", ", round(x$auc.conf.int[2], 3), "])")
+      auc_text <- paste0(auc_text, " (95% CI: [", round(x$auc_conf_int[1], 3),
+                         ", ", round(x$auc_conf_int[2], 3), "])")
     }
     subtitle_text = paste0(wmw_test_text, auc_text)
     #

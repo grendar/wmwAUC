@@ -71,7 +71,6 @@ Uses \pkg{twosamples} for distribution comparison and
 \code{KSd} from \pkg{sfsmisc} for exact confidence bands.
 }
 \examples{
-
 library(wmwAUC)
 
 data(Ex2)

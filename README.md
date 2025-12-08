@@ -1,5 +1,4 @@
-Wilcoxon-Mann-Whitney Test of No Group Discrimination (Continuous
-Variables)
+Wilcoxon-Mann-Whitney Test of No Group Discrimination
 ================
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -26,7 +25,49 @@ tie-corrected asymptotics and finite-sample bias corrections. For
 detalis, see ([Grendár 2025](#ref-grendar2025wmw)).
 
 The primary goal of wmwAUC is to provide inferences for the
-Wilcoxon-Mann-Whitney test of $\mathrm{H_0\colon AUC = 0.5}$.
+Wilcoxon-Mann-Whitney test of $\mathrm{H_0\colon AUC = 0.5}$. Besides
+the asymtotic inferences the library provides two variants of
+finite-sample bias correction:
+
+- *Exact Unbiased* (EU) Method: Universal approach handling data with
+  arbitrary tie patterns through the mid-rank kernel and exact
+  finite-sample unbiased variance estimation from Hoeffding
+  decomposition theory. Reduces correctly to the continuous case when no
+  ties are present.
+
+- *Bias-Corrected* (BC) Method: Alternative for continuous data without
+  ties, using individual component bias correction with $O(n^{-1})$
+  finite-sample corrections and Welch-Satterthwaite degrees of freedom.
+  Assumes continuous distributions with no ties.
+
+The EU method serves as the default implementation, providing:
+
+- Universal applicability (handles any data type - continuous, discrete,
+  or mixed)
+
+- Exact finite-sample unbiasedness (not asymptotic approximation)
+
+- Theoretically principled tie handling through mid-rank kernel
+
+The BC method is available for users specifically working with
+continuous data or requiring compatibility with traditional variance
+estimation approaches.
+
+Key functions include:
+
+- `wmw_test()`: Main testing function using EU methodology with option
+  to use BC method for continuous-only data
+
+- `wmw_pvalue()`: WMW AUC p-values for continuous data, based on the BC
+  method
+
+- `wmw_pvalue_ties()`: WMW AUC p-values for any type of data, based on
+  the EU method
+
+- `pseudomedian_ci()`: Confidence intervals for Hodges-Lehmann
+  pseudomedian
+
+- `quadruplot()`: Diagnostics for location shift assumption
 
 ## Installation
 
@@ -69,7 +110,7 @@ estimation.
 # pval_wt = pval_wmw = eauc = numeric(N)
 # for (i in 1:N) {
 #
-#  x = rnorm(n, sd = 0.1)
+#   x = rnorm(n, sd = 0.1)
 #   y = rnorm(n, sd = 3)
 #   # wilcox.test() of H0: F = G
 #   wt = wilcox.test(x, y)
@@ -174,7 +215,7 @@ those returned by `wilcox.test()`.
 #  x_test <- rnorm(n_test, 0, 1)
 #  y_test <- VGAM::rlaplace(n_test, 0, 1)
 #
-#  wmw_test <- pseudomedian_ci(x_test, y_test, conf.level = 0.95)
+#  wmw_test <- pseudomedian_ci(x_test, y_test, conf.level = 0.9, pvalue_method = 'BC')
 #  wmw_ci[[i]] = wmw_test$conf.int
 #  wt_test <- wilcox.test(x_test, y_test, conf.int = TRUE)
 #  wt_ci[[i]] = wt_test$conf.int
@@ -232,12 +273,10 @@ wmd
 #> 
 #> data: P19099 by MS (n1 = 37, n2 = 64)
 #> groups: yes vs no (reference)
-#> W = 1726, p-value = 0.001131
+#> U = 1726, eAUC = 0.729, p-value = 0.000007, method = EU
 #> alternative hypothesis for AUC: two.sided 
 #> 95 percent confidence interval for AUC (hanley): 
 #>  0.623 0.835
-#> empirical AUC (eAUC):
-#>  0.729
 ```
 
 <img src="man/figures/README-plot_ex1-1.png" width="50%" style="display: block; margin: auto;" />
@@ -259,12 +298,10 @@ wmd
 #> 
 #> data: y by group (n1 = 100, n2 = 100)
 #> groups: case vs control (reference)
-#> W = 3705, p-value = 0.003197
+#> U = 3705, eAUC = 0.370, p-value = 0.001106, method = EU
 #> alternative hypothesis for AUC: two.sided 
 #> 95 percent confidence interval for AUC (hanley): 
 #>  0.294 0.447
-#> empirical AUC (eAUC):
-#>  0.370
 ```
 
 <img src="man/figures/README-ROC_example2-1.png" width="50%" style="display: block; margin: auto;" />
@@ -282,19 +319,17 @@ conclude significant median difference despite identical medians.
     #> 
     #> data: y by group (n1 = 100, n2 = 100)
     #> groups: case vs control (reference)
-    #> W = 3705, p-value = 0.003197
+    #> U = 3705, eAUC = 0.370, p-value = 0.001106, method = EU
     #> alternative hypothesis for AUC: two.sided 
     #> 95 percent confidence interval for AUC (hanley): 
     #>  0.294 0.447
-    #> empirical AUC (eAUC):
-    #>  0.370 [discrimination effect size]
     #> 
     #> Location-shift analysis (under F1(x) = F2(x - delta)):
     #> alternative hypothesis for location: two.sided 
-    #> 95 percent confidence interval for median of all pairwise distances:
-    #>  -0.101 -0.017
     #> Hodges-Lehmann median of all pairwise distances:
     #>  -0.048 [location effect size: eAUC = 0.370]
+    #> 95 percent confidence interval for median of all pairwise distances:
+    #>  -0.084 -0.037
 
 Indeed, the medians are essentially the same:
 
@@ -309,9 +344,6 @@ median(da$y[da$group == 'control'])
 
 WMW applied to another real-life data set.
 
-WARNING: the data contain ties. Current version of wmwAUC package does
-not take ties into account.
-
 ``` r
 data(wesdr)
 da = wesdr
@@ -324,12 +356,10 @@ wmd
 #> 
 #> data: bmi by ret (n1 = 278, n2 = 391)
 #> groups: 1 vs 0 (reference)
-#> W = 59417.5, p-value = 0.037970
+#> U = 59417.5, eAUC = 0.547, p-value = 0.035168, method = EU
 #> alternative hypothesis for AUC: two.sided 
 #> 95 percent confidence interval for AUC (hanley): 
 #>  0.502 0.591
-#> empirical AUC (eAUC):
-#>  0.547
 ```
 
 <img src="man/figures/README-roc_Ex3-1.png" width="50%" style="display: block; margin: auto;" />
@@ -342,29 +372,25 @@ hence, location shift assumption is tenable.
 ### Special case of WMW test
 
 ``` r
-suppressWarnings({ # ties in data
 wml <- wmw_test(bmi ~ ret, data = da, ref_level = '0', 
-                 ci_method = 'boot', special_case = TRUE)
-})                 
+                 ci_method = 'boot', special_case = TRUE, n_grid = 100)
 wml
 #> 
 #>         Wilcoxon-Mann-Whitney Test of No Group Discrimination
 #> 
 #> data: bmi by ret (n1 = 278, n2 = 391)
 #> groups: 1 vs 0 (reference)
-#> W = 59417.5, p-value = 0.037970
+#> U = 59417.5, eAUC = 0.547, p-value = 0.035168, method = EU
 #> alternative hypothesis for AUC: two.sided 
 #> 95 percent confidence interval for AUC (boot): 
 #>  0.499 0.591
-#> empirical AUC (eAUC):
-#>  0.547 [discrimination effect size]
 #> 
 #> Location-shift analysis (under F1(x) = F2(x - delta)):
 #> alternative hypothesis for location: two.sided 
-#> 95 percent confidence interval for median of all pairwise distances:
-#>  0.025 1.054
 #> Hodges-Lehmann median of all pairwise distances:
 #>  0.600 [location effect size: eAUC = 0.547]
+#> 95 percent confidence interval for median of all pairwise distances:
+#>  0.294 0.906
 ```
 
 Plot

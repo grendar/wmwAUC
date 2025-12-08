@@ -83,29 +83,29 @@ roc_with_ci <- function(
   #
   if (ci_method == "bootstrap") {
     auc_boot <- numeric(n_boot)
-
+    
     # Common FPR grid for ROC confidence band
     fpr_grid <- seq(0, 1, length.out = 200)
     tpr_mat <- matrix(NA, nrow = n_boot, ncol = length(fpr_grid))
-
+    
     for (b in seq_len(n_boot)) {
       idx <- sample(seq_along(y), replace = TRUE)
-
+      
       probs_b <- probs[idx]
       y_b <- y[idx]
-
+      
       ord_b <- order(probs_b, decreasing = TRUE)
       roc_b <- compute_roc(y_b[ord_b])
-
+      
       # Interpolate ROC on common grid
-      tpr_mat[b, ] <- approx(roc_b$fpr, roc_b$tpr,
-                             xout = fpr_grid, rule = 2)$y
-
+      tpr_mat[b, ] <- suppressWarnings(approx(roc_b$fpr, roc_b$tpr,
+                             xout = fpr_grid, rule = 2)$y)
+      
       # Bootstrap AUC
       auc_boot[b] <- sum(diff(roc_b$fpr) *
                            (head(roc_b$tpr, -1) + tail(roc_b$tpr, -1)) / 2)
     }
-
+    
     # AUC CI from bootstrap percentiles
     auc_ci <- quantile(auc_boot, c(alpha/2, 1 - alpha/2))
 
