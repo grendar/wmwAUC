@@ -4,7 +4,7 @@
 \alias{test_shift_equivalence}
 \title{Test of equality of distributions from twosamples library applied to median-centered data}
 \usage{
-test_shift_equivalence(x, y, test = "ks")
+test_shift_equivalence(x, y, test = "ks", seed = 123L)
 }
 \arguments{
 \item{x}{vector}
@@ -12,6 +12,8 @@ test_shift_equivalence(x, y, test = "ks")
 \item{y}{vector}
 
 \item{test}{one of c("ks", "kuiper", "cvm", "ad", "wass", "dts")}
+
+\item{seed}{numeric, used in \code{set.seed()}}
 }
 \value{
 A list of class "shift_test" containing:

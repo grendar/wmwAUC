@@ -120,12 +120,9 @@ are obtained by inverting the test.
 }
 }
 \examples{
-library(wmwAUC)  
+library('wmwAUC')  
 # Ex 1
 \donttest{
-if (!requireNamespace("gemR", quietly = TRUE)) {
-install.packages("gemR")
-}
 library('gemR')
 data(MS)
 da <- MS
@@ -169,9 +166,6 @@ wml
 
 # Ex 3
 \donttest{
-if (!requireNamespace("gss", quietly = TRUE)) {
-install.packages("gss")
-}
 library('gss')
 data(wesdr)
 da = wesdr

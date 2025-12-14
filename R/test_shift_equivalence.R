@@ -5,6 +5,7 @@
 #' @param x vector
 #' @param y vector
 #' @param test one of c("ks", "kuiper", "cvm", "ad", "wass", "dts")
+#' @param seed numeric, used in `set.seed()`
 #'
 #' @return A list of class "shift_test" containing:
 #' \item{statistic}{Test statistic value}
@@ -21,14 +22,14 @@
 #'
 #' @keywords internal
 #' @export
-test_shift_equivalence <- function(x, y, test = "ks") {
+test_shift_equivalence <- function(x, y, test = "ks", seed = 123L) {
   #
   # Center by medians
   x_centered <- x - median(x, na.rm = T)
   y_centered <- y - median(y, na.rm = T)
 
   # Set seed for reproducible bootstrap results
-  set.seed(123L)
+  set.seed(seed)
 
   # Select the appropriate test - use twosamples for all tests for consistency
   assumption_test <- switch(test,

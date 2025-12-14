@@ -15,6 +15,7 @@
 #'   Tests for distributional equality applied to median-centered data: 
 #'   "ks" (Kolmogorov-Smirnov) (default), "kuiper" (Kuiper), "cvm" (Cramér-von Mises), 
 #'   "ad" (Anderson-Darling), "wass" (Wasserstein), "dts" (DTS test).
+#' @param seed Numeric, for set.seed() used in `test_shift_equivalence()` for bootstrap.
 #' @param ylab Character, label for y-axis. If NULL (default), uses variable name
 #' @param color_palette Character, color palette to use. One of "viridis", "plasma", 
 #'   "inferno", "magma", or "cividis"
@@ -65,6 +66,7 @@
 quadruplot <- function(formula, data, 
                        ref_level = NULL, 
                        test = 'ks', 
+                       seed = 123L,
                        ylab = NULL,
                        color_palette = "lancet",
                        combine_plots = TRUE,
@@ -406,7 +408,7 @@ quadruplot <- function(formula, data,
   x_vals <- values[groups != ref_level]    # cases
   y_vals <- values[groups ==  ref_level]   # controls
   #
-  test_loc = test_shift_equivalence(x_vals, y_vals, test = test) # internally de-centers by medians
+  test_loc = test_shift_equivalence(x_vals, y_vals, test = test, seed = seed) # internally de-centers by medians
   #
   ##########################################################
   #

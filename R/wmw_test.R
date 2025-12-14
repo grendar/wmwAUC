@@ -91,12 +91,9 @@
 #'   \item{group_ref_level}{Character string indicating which level corresponds to reference group}
 #'
 #' @examples
-#' library(wmwAUC)  
+#' library('wmwAUC')  
 #' # Ex 1
 #' \donttest{
-#' if (!requireNamespace("gemR", quietly = TRUE)) {
-#' install.packages("gemR")
-#' }
 #' library('gemR')
 #' data(MS)
 #' da <- MS
@@ -140,9 +137,6 @@
 #'
 #' # Ex 3
 #' \donttest{
-#' if (!requireNamespace("gss", quietly = TRUE)) {
-#' install.packages("gss")
-#' }
 #' library('gss')
 #' data(wesdr)
 #' da = wesdr

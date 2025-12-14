@@ -17,20 +17,8 @@ knitr::opts_chunk$set(
   warning = FALSE,
   message = FALSE
 )
-library(wmwAUC)
- if (!requireNamespace("gemR", quietly = TRUE)) {
-     install.packages("gemR")
- }
+library('wmwAUC')
 library('gemR')
-#
-if (!requireNamespace("gss", quietly = TRUE)) {
-  install.packages("gss")
-}
-library('gss')
-#
-if (!requireNamespace("VGAM", quietly = TRUE)) {
-  install.packages("VGAM")
-}
 library('gss')
 #
 # 

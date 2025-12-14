@@ -9,6 +9,7 @@ quadruplot(
   data,
   ref_level = NULL,
   test = "ks",
+  seed = 123L,
   ylab = NULL,
   color_palette = "lancet",
   combine_plots = TRUE,
@@ -29,6 +30,8 @@ uses first factor level}
 Tests for distributional equality applied to median-centered data:
 "ks" (Kolmogorov-Smirnov) (default), "kuiper" (Kuiper), "cvm" (Cramér-von Mises),
 "ad" (Anderson-Darling), "wass" (Wasserstein), "dts" (DTS test).}
+
+\item{seed}{Numeric, for set.seed() used in \code{test_shift_equivalence()} for bootstrap.}
 
 \item{ylab}{Character, label for y-axis. If NULL (default), uses variable name}
 
