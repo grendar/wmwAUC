@@ -28,6 +28,8 @@ library('gss')
 # wmwAUC
 
 <!-- badges: start -->
+[![CRAN status](https://www.r-pkg.org/badges/version/wmwAUC)](https://cran.r-project.org/package=wmwAUC)
+[![CRAN downloads](https://cranlogs.r-pkg.org/badges/grand-total/wmwAUC)](https://cran.r-project.org/package=wmwAUC)
 <!-- badges: end -->
 
 Statistical theory incorrectly states that the Wilcoxon-Mann-Whitney (WMW) test examines
