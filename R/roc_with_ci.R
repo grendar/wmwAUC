@@ -4,9 +4,13 @@
 #' @param labels Vector, factor with two levels
 #' @param positive Character giving the level that corresponds to 'case'
 #' @param auc Numeric value of AUC
-#' @param ci_method Character from c("none", "hanley", "bootstrap")
+#' @param ci_method Character from c("none", "delong", "bootstrap")
 #' @param n_boot Numeric value giving the number of bootstrap replicates (default: 1000)
 #' @param alpha  Level of significance (default: 0.05)
+#'
+#' @details \code{ci_method = 'bootstrap'} makes this function's result
+#' stochastic (resampled AUC and ROC confidence band). For reproducible
+#' results, call \code{set.seed()} immediately beforehand.
 #'
 #' @return List with components:
 #'   \item{roc_df}{data frame for plotting ROC curve}
@@ -24,20 +28,20 @@ roc_with_ci <- function(
     labels,
     positive,
     auc,
-    ci_method = c("none", "hanley", "bootstrap"),
+    ci_method = c("none", "delong", "bootstrap"),
     n_boot = 1000,
     alpha = 0.05
 ) {
   ci_method <- match.arg(ci_method)
-
+  
   # Convert labels to numeric 0/1 (1 = positive)
   y <- ifelse(labels == positive, 1, 0)
-
+  
   # Sort by decreasing score
   ord <- order(probs, decreasing = TRUE)
   probs_ord <- probs[ord]
   y_ord <- y[ord]
-
+  
   ##############################################################################
   # ROC computation
   ##############################################################################
@@ -45,38 +49,45 @@ roc_with_ci <- function(
   compute_roc <- function(y_sorted) {
     P <- sum(y_sorted == 1)
     N <- sum(y_sorted == 0)
-
+    
     TPR <- cumsum(y_sorted == 1) / P
     FPR <- cumsum(y_sorted == 0) / N
-
+    
     data.frame(fpr = c(0, FPR), tpr = c(0, TPR))
   }
-
+  
   roc_df <- compute_roc(y_ord)
-
+  
   # ci for AUC
   auc_ci <- c(NA, NA)
   roc_band <- NULL
-
+  
   ##############################################################################
-  # Hanley & McNeil (analytical) CI
+  # DeLong et al. (1988) structural-components CI
   ##############################################################################
   #
-  if (ci_method == "hanley") {
-    P <- sum(y == 1)
-    N <- sum(y == 0)
-
-    Q1 <- auc / (2 - auc)
-    Q2 <- 2 * auc^2 / (1 + auc)
-
-    se_auc <- sqrt((auc * (1 - auc) +
-                      (P - 1) * (Q1 - auc^2) +
-                      (N - 1) * (Q2 - auc^2)) / (P * N))
-
+  if (ci_method == "delong") {
+    x_case <- probs[y == 1]
+    y_ref  <- probs[y == 0]
+    m <- length(x_case)
+    n <- length(y_ref)
+    
+    # mid-rank kernel, consistent with the auc = P(case > reference)
+    # convention used throughout this package
+    psi_mat <- outer(x_case, y_ref, function(a, b) (a > b) + 0.5 * (a == b))
+    
+    V10 <- rowMeans(psi_mat)  # one structural component per case
+    V01 <- colMeans(psi_mat)  # one structural component per reference obs
+    
+    S10 <- var(V10)  # var() default: divide by (m-1)
+    S01 <- var(V01)  # divide by (n-1)
+    
+    se_auc <- sqrt(S10 / m + S01 / n)
+    
     z <- qnorm(1 - alpha / 2)
     auc_ci <- c(auc - z * se_auc, auc + z * se_auc)
   }
-
+  
   ##############################################################################
   # Bootstrap CI for AUC + ROC band
   ##############################################################################
@@ -99,7 +110,7 @@ roc_with_ci <- function(
       
       # Interpolate ROC on common grid
       tpr_mat[b, ] <- suppressWarnings(approx(roc_b$fpr, roc_b$tpr,
-                             xout = fpr_grid, rule = 2)$y)
+                                              xout = fpr_grid, rule = 2)$y)
       
       # Bootstrap AUC
       auc_boot[b] <- sum(diff(roc_b$fpr) *
@@ -108,7 +119,7 @@ roc_with_ci <- function(
     
     # AUC CI from bootstrap percentiles
     auc_ci <- quantile(auc_boot, c(alpha/2, 1 - alpha/2))
-
+    
     # Pointwise ROC confidence band
     roc_band <- data.frame(
       fpr = fpr_grid,

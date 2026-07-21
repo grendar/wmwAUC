@@ -14,8 +14,8 @@ plot_roc = function(x, ...) {
   #
   roc_df <- x$roc_df
   roc_band <- x$roc_band
-  auc <- x$roc_object$auc
-  auc_ci <- x$roc_object$auc_ci
+  auc <- x$auc
+  auc_ci <- x$auc_ci
   #
   p <- ggplot2::ggplot() +
     ggplot2::geom_line(data = roc_df,
@@ -26,7 +26,7 @@ plot_roc = function(x, ...) {
     ggplot2::labs(
       title = "ROC Curve",
       subtitle = sprintf(
-        "AUC = %.3f (%.3f, %.3f)",
+        "eAUC = %.3f (%.3f, %.3f)",
         auc,
         auc_ci[1],
         auc_ci[2]
@@ -34,7 +34,7 @@ plot_roc = function(x, ...) {
       x = "False Positive Rate",
       y = "True Positive Rate"
     )
-
+  
   if (!is.null(roc_band)) {
     p <- p +
       ggplot2::geom_ribbon(
@@ -48,4 +48,3 @@ plot_roc = function(x, ...) {
   return(p)
   #
 }
-

@@ -9,7 +9,7 @@ roc_with_ci(
   labels,
   positive,
   auc,
-  ci_method = c("none", "hanley", "bootstrap"),
+  ci_method = c("none", "delong", "bootstrap"),
   n_boot = 1000,
   alpha = 0.05
 )
@@ -23,7 +23,7 @@ roc_with_ci(
 
 \item{auc}{Numeric value of AUC}
 
-\item{ci_method}{Character from c("none", "hanley", "bootstrap")}
+\item{ci_method}{Character from c("none", "delong", "bootstrap")}
 
 \item{n_boot}{Numeric value giving the number of bootstrap replicates (default: 1000)}
 
@@ -38,5 +38,10 @@ List with components:
 }
 \description{
 ROC related computations -- internal function
+}
+\details{
+\code{ci_method = 'bootstrap'} makes this function's result
+stochastic (resampled AUC and ROC confidence band). For reproducible
+results, call \code{set.seed()} immediately beforehand.
 }
 \keyword{internal}

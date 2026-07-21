@@ -9,7 +9,7 @@ A list containing simulation results (N=10000, n=1000):
 \describe{
 \item{eauc}{Empirical AUC values}
 \item{pval_wt}{Traditional wilcox.test p-values}
-\item{pval_wmw}{WMW p-values under H0: AUC = 0.5}
+\item{pval_wmwAUC}{wmwAUC p-values under H0: AUC = 0.5}
 }
 }
 \usage{

@@ -1,12 +1,14 @@
 ---
 output: github_document
-title: 'Wilcoxon-Mann-Whitney Test of No Group Discrimination'
+title: 'wmwAUC Test of No Group Discrimination'
 bibliography: inst/refs.bib
 link-citations: true
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
@@ -24,61 +26,82 @@ library('gss')
 # 
 ```
 
-
 # wmwAUC
 
 <!-- badges: start -->
-[![CRAN status](https://www.r-pkg.org/badges/version/wmwAUC)](https://cran.r-project.org/package=wmwAUC)
-[![CRAN downloads](https://cranlogs.r-pkg.org/badges/grand-total/wmwAUC)](https://cran.r-project.org/package=wmwAUC)
+
+[![CRAN
+status](https://www.r-pkg.org/badges/version/wmwAUC)](https://cran.r-project.org/package=wmwAUC)
+[![CRAN
+downloads](https://cranlogs.r-pkg.org/badges/grand-total/wmwAUC)](https://cran.r-project.org/package=wmwAUC)
+
 <!-- badges: end -->
 
-Statistical theory incorrectly states that the Wilcoxon-Mann-Whitney (WMW) test examines
-$\mathrm{H_0\colon F = G}$. We demonstrate this theoretical claim is untenable: 
-the WMW statistic, when standardized, is the empirical AUC (eAUC), which measures $P(X < Y)$ 
-and cannot detect distributional equality. Through Monte Carlo analysis of zero-mean 
-heteroscedastic Gaussians and corresponding asymptotic theory, we show that WMW
-tests $\mathrm{H_0\colon AUC = 0.5}$ (no systematic discrimination) rather than 
-distributional equality. Moreover, the traditional alternative hypothesis of 
-stochastic dominance is unnecessarily restrictive; WMW is consistent against the
-broader alternative $\mathrm{H_1\colon AUC \neq 0.5}$, as established by Van Dantzig (1951).
-We provide theoretical framework and implementation consistent with what the WMW eAUC 
-statistic actually computes, including tie-corrected asymptotics and finite-sample 
-bias corrections. For detalis, see [@grendar2025wmw].
+The classical Wilcoxon-Mann-Whitney (WMW) test is calibrated under the
+null hypothesis $\mathrm{H_0\colon F = G}$. However, the WMW test
+statistic, when standardized, is the empirical AUC (eAUC), and hence the
+test in fact assesses the set $\{\mathrm{(F,G)\colon AUC = 0.5}\}$ --
+which does not match $\mathrm{H_0\colon F = G}$. This incoherence causes
+that WMW test provides erroneous inferences.
 
-The primary goal of wmwAUC is to provide inferences for the Wilcoxon-Mann-Whitney test
-of $\mathrm{H_0\colon AUC = 0.5}$. Besides the asymtotic inferences the library provides
-two variants of finite-sample bias correction:
+Through Monte Carlo analysis of zero-mean heteroskedastic Gaussians and
+corresponding asymptotic theory, we demonstrate this mismatch directly:
+the eAUC concentrates on 0.5 even when $\mathrm{F \neq G}$, showing that
+the classical test's calibration cannot be tracking distributional
+equality. Moreover, the traditional alternative hypothesis of stochastic
+dominance is unnecessarily restrictive; the WMW statistic is consistent
+against the broader alternative $\mathrm{H_1\colon AUC \neq 0.5}$, as
+established by Van Dantzig (1951).
 
-- *Exact Unbiased* (EU) Method: Universal approach handling data with arbitrary tie patterns 
-through the mid-rank kernel and exact finite-sample unbiased variance estimation from Hoeffding decomposition theory.  Reduces correctly to the continuous case when no ties are present.
+**wmwAUC** implements a properly calibrated test of
+$\mathrm{H_0\colon AUC = 0.5}$ based on the WMW statistic; for details,
+see [@grendar2025wmw]. The package provides both asymptotic inference
+and two finite-sample bias-correction methods:
 
-- *Bias-Corrected* (BC) Method: Alternative for continuous data without ties, 
-using individual component bias correction with $O(n^{-1})$ finite-sample corrections and 
-Welch-Satterthwaite degrees of freedom. Assumes continuous distributions with no ties.
+-   *Exact Unbiased* (EU) Method: Universal approach handling data with
+    arbitrary tie patterns through the mid-rank kernel and exact
+    finite-sample unbiased variance estimation from Hoeffding
+    decomposition theory. Reduces correctly to the continuous case when
+    no ties are present.
+
+-   *Bias-Corrected* (BC) Method: Alternative using individual 
+    placement-component bias correction with $O(n^{-1})$
+    finite-sample corrections and Welch-Satterthwaite degrees of  
+    freedom. Derived for continuous data (Sect. 4 of the paper); the
+    implementation extends this to ties via the same mid-rank kernel as EU,
+    with conservative behavior confirmed by simulation to persist under ties.
 
 The EU method serves as the default implementation, providing:
 
-- Universal applicability (handles any data type - continuous, discrete, or mixed)
+-   Universal applicability (handles any data type - continuous,
+    discrete, or mixed)
 
-- Exact finite-sample unbiasedness (not asymptotic approximation)  
+-   Exact finite-sample unbiasedness (not asymptotic approximation)
 
-- Theoretically principled tie handling through mid-rank kernel
+-   Theoretically principled tie handling through mid-rank kernel
 
+-   Retained real power at small sample sizes where BC's power can be
+    close to zero
 
-The BC method is available for users specifically working with continuous data 
-or requiring compatibility with traditional variance estimation approaches.
+BC remains available for users who specifically want its more
+conservative behavior.
 
 Key functions include:
 
-- `wmw_test()`: Main testing function using EU methodology with option to use BC method for continuous-only data
+-   `wmwAUC_test()`: Main testing function, defaulting to the EU method,
+    with an option to select BC instead
 
-- `wmw_pvalue()`: WMW AUC p-values for continuous data, based on the BC method
+-   `wmwAUC_pvalue_BC()`: WMW AUC p-values via the BC method
 
-- `wmw_pvalue_ties()`: WMW AUC p-values for any type of data, based on the EU method
+-   `wmwAUC_pvalue_EU()`: WMW AUC p-values via the EU method, valid for
+    any tie pattern
 
-- `pseudomedian_ci()`: Confidence intervals for Hodges-Lehmann pseudomedian
+-   `wmwAUC_pseudomedian_ci()`: Confidence interval for the
+    AUC-equalizing shift (pseudomedian), obtained by inverting the test
 
-- `quadruplot()`: Diagnostics for location shift assumption
+(The old names `wmw_test()`, `wmw_pvalue()`, `wmw_pvalue_ties()`, and
+`pseudomedian_ci()` are not retained as functional aliases. Calling any of
+them raises an informative error naming the current function to use instead.)
 
 
 ## Installation
@@ -91,14 +114,23 @@ devtools::install_github('grendar/wmwAUC')
 
 ## Simulation 1
 
-Consider the setting of two zero-mean different-scale gaussians. Then the traditional
-$\mathrm{H_0\colon F = G}$ of WMW test is false and $\mathrm{H_0\colon F \neq G}$ holds. 
+Consider the setting of two zero-mean different-scale gaussians. Then
+the traditional $\mathrm{H_0\colon F = G}$ of the classical WMW test is
+false and $\mathrm{H_0\colon F \neq G}$ holds.
 
-The Monte Carlo simulation demonstrates that the normalized test statistic $U/(n_1n_2)$ which is just eAUC, concentrates asymptotically on 0.5 - the value expected under a true null hypothesis.
+The Monte Carlo simulation demonstrates that the normalized test
+statistic $U/(n_1n_2)$ which is just eAUC, concentrates asymptotically
+on 0.5 - the value expected under a true null hypothesis.
 
-If WMW tested distributional equality, the test statistic should not concentrate on its null value when distributions clearly differ.
+If the classical WMW test tested distributional equality, the test
+statistic should not concentrate on its null value when distributions
+clearly differ.
 
-Also note that under $\mathrm{H_0\colon F \neq G}$, p-values should concentrate near zero, yet the observed distribution  is nearly uniform with a slightly elevated first bins, consistent with testing a true null hypothesis ($\mathrm{H_0\colon AUC = 0.5}$) using miscalibrated variance estimation.
+Also note that under $\mathrm{H_0\colon F \neq G}$, p-values should
+concentrate near zero, yet the observed distribution is nearly uniform
+with a slightly elevated first bins, consistent with testing a true null
+hypothesis ($\mathrm{H_0\colon AUC = 0.5}$) using miscalibrated variance
+estimation.
 
 ```{r simulation1}
 #############################################################################
@@ -111,7 +143,7 @@ Also note that under $\mathrm{H_0\colon F \neq G}$, p-values should concentrate 
 # N = 10000
 # n = 1000
 # set.seed(123L)
-# pval_wt = pval_wmw = eauc = numeric(N)
+# pval_wt = pval_wmwAUC = eauc = numeric(N)
 # for (i in 1:N) {
 #
 #   x = rnorm(n, sd = 0.1)
@@ -119,13 +151,13 @@ Also note that under $\mathrm{H_0\colon F \neq G}$, p-values should concentrate 
 #   # wilcox.test() of H0: F = G
 #   wt = wilcox.test(x, y)
 #   pval_wt[i] = wt$p.value
-#   # wmw_test() of H0: AUC = 0.5
-#   pval_wmw[i] = wmw_pvalue(x, y)
+#   # wmwAUC_test() of H0: AUC = 0.5
+#   pval_wmwAUC[i] = wmwAUC_pvalue_BC(x, y)
 #   # eAUC
 #   eauc[i] = wt$statistic/(n*n)
 #   #
 # }
-data(simulation1)  # List eauc, pval_wt, pval_wmw
+data(simulation1)  # List eauc, pval_wt, pval_wmwAUC
 #
 ```
 
@@ -143,16 +175,17 @@ Traditional p-values under $\mathrm{H_1}$ should concentrate near 0.
 
 ```{r, hist_sim1_3, fig.width=5, fig.height=5, include=T, fig.align='center', fig.show='hold', out.width = "50%", echo = FALSE}
 # Correct p-values (correctly testing AUC = 0.5)  
-hist(simulation1$pval_wmw)
+hist(simulation1$pval_wmwAUC)
 ```
 
 Correct p-values for testing $\mathrm{H_0\colon AUC = 0.5}$.
 
-
 ## Simulation 2
 
-The two zero-mean different-scale gaussians setting does not satisfy the traditional $\mathrm{H_1}$ of the stochastic dominance. But, as proved by Van Dantzig in 1951, WMW is consistent for broader $\mathrm{H_1\colon AUC \neq 0.5}$.
-
+The two zero-mean different-scale gaussians setting does not satisfy the
+traditional $\mathrm{H_1}$ of the stochastic dominance. But, as proved
+by Van Dantzig in 1951, the WMW statistic is consistent for the broader
+$\mathrm{H_1\colon AUC \neq 0.5}$.
 
 ```{r simulation2}
 #############################################################################
@@ -167,7 +200,7 @@ The two zero-mean different-scale gaussians setting does not satisfy the traditi
 # N = 10000
 # n = 1000
 # set.seed(123L)
-# pval_wt = pval_wmw = eauc = numeric(N)
+# pval_wt = pval_wmwAUC = eauc = numeric(N)
 # for (i in 1:N) {
 # #
 #   # gaussians with different location and scale
@@ -177,91 +210,26 @@ The two zero-mean different-scale gaussians setting does not satisfy the traditi
 #   # wilcox.test H0: F = G vs H1: (F stochastically dominates G) OR (G stochastically dominates F)
 #   wt = wilcox.test(x, y)
 #   pval_wt[i] = wt$p.value
-#   # wmw_test H0: AUC = 0.5 vs H1: AUC neq 0.5
-#   pval_wmw[i] = wmw_pvalue(x, y)
+#   # wmwAUC_test H0: AUC = 0.5 vs H1: AUC neq 0.5
+#   pval_wmwAUC[i] = wmwAUC_pvalue_BC(x, y)
 #   # eAUC
 #   eauc[i] = wt$statistic/(n*n)
 # #
 # }
-data(simulation2)  # List of eauc, pval_wt, pval_wmw
+data(simulation2)  # List of eauc, pval_wt, pval_wmwAUC
 # WMW detects broader alternatives than traditional stochastic dominance
 ```
 
 ```{r,hist_sim2, fig.width=5, fig.height=5, include=T, fig.align='center', fig.show='hold', out.width = "50%", echo = FALSE}
 hist(simulation2$eauc)
-hist(simulation2$pval_wmw)
+hist(simulation2$pval_wmwAUC)
 hist(simulation2$pval_wt)
 
 ```
 
-## Simulation 3 
-
-Confidence interval for the pseudomedian is obtained by inverting the test; 
-see `pseudomedian_ci()` for implementation that handles the edge cases in the same 
-way as `wilcox.test()`.
-
-In this simulation study, N = 500 MC replicates are created, of 300 samples from 
-the standard normal distribution and 300 samples from the Laplace distribution with
-location = 0, scale = 1. Properties of 95% confidence intervals obtained under H0: AUC = 0.5
-are compared with those returned by `wilcox.test()`.
-
-
-```{r, simulation3}
-# #############################################################################
-# #
-# # Simulation 3: confidence interval for pseudomedian derived under H0: AUC = 0.5   
-# #               MC study of N = 500 replicas
-# #               x ~ rnorm(300, 0,1)
-# #               y ~ rlaplace(300, 0,1)
-# #
-# #############################################################################
-#
-#
-#
-# This simulation takes long time to complete
-# N <- 500
-# n_test <- 300
-#
-# set.seed(123L)
-# wmw_ci = wt_ci = list(N)
-# eauc = pseudomed = numeric(N)
-# for (i in 1:N) {
-#  #
-#  x_test <- rnorm(n_test, 0, 1)
-#  y_test <- VGAM::rlaplace(n_test, 0, 1)
-#
-#  wmw_test <- pseudomedian_ci(x_test, y_test, conf.level = 0.9, pvalue_method = 'BC')
-#  wmw_ci[[i]] = wmw_test$conf.int
-#  wt_test <- wilcox.test(x_test, y_test, conf.int = TRUE)
-#  wt_ci[[i]] = wt_test$conf.int
-#  eauc[i] = wt_test$statistic/(n_test*n_test)
-#  pseudomed[i] = as.numeric(wt_test$estimate)
-#  #  
-# }
-#
-#
-data(simulation3)  # List of wmw_ci, wt_ci, eauc, pseudomedian
-# 
-# Average across MC of confidence intervals obtained under H0: AUC=0.5
-colMeans(simulation3$wmw_ci)
-# Average across MC of confidence intervals from wilcox.test()
-colMeans(simulation3$wt_ci)
-# 
-# Average across MC of eAUC
-mean(simulation3$eauc)
- 
-# Coverage
-length(which((simulation3$wmw_ci[,1] < 0) & (simulation3$wmw_ci[,2] > 0)))
-length(which((simulation3$wt_ci[,1] < 0) & (simulation3$wt_ci[,2] > 0)))
-
-# Mean pseudomedian
-mean(simulation3$pseudomed)
-```
-
-
 ## Example 1
 
-Real data analyzed by WMW test of no group discrimination. 
+Real data analyzed by wmwAUC test of no group discrimination.
 
 ```{r example1}
 data(gemR::MS)
@@ -276,104 +244,27 @@ df$MS <- da$MS
 ### Test of no group discrimination
 
 ```{r Ex1_discrimination}
-wmd <- wmw_test(P19099 ~ MS, data = df, ref_level = 'no')
+wmd <- wmwAUC_test(P19099 ~ MS, data = df, ref_level = 'no')
 wmd
 
 ```
 
-```{r plot_ex1, fig.width=5, fig.height=5, include=T, fig.align='center', fig.show='hold', out.width = "50%", echo = FALSE}
+```{r plot_ex1, fig.width=10, fig.height=5, include=T, fig.align='center', fig.show='hold', out.width = "75%", echo = FALSE}
 plot(wmd)
 ```
 
+### AUC-equalizing shift (pseudomedian)
 
-## Example 2
-
-Synthetic data illustrating the special case of location shift assumption.
-
-```{r example2}
-data(Ex2)
-da <- Ex2
-
-# WMW test
-wmd <- wmw_test(y ~ group, data = da, ref_level = 'control')
-wmd
-```
-
-```{r ROC_example2, fig.width=5, fig.height=5, include=T, fig.align='center', fig.show='hold', out.width = "50%", echo = FALSE}
-plot(wmd)
-```
-
-### Check location-shift assumption with EDA
-
-```{r quadruplot_Ex2, fig.width=11, fig.height=8, include=T, fig.align='center', fig.show='hold', out.width = "100%", echo = FALSE}
-# Check location-shift assumption with EDA
-qp <- quadruplot(y ~ group, data = da, ref_level = 'control')
-qp
-# => location-shift assumption not tenable
-```
-location-shift assumption not tenable.
-
-
-Erroneous use of location-shift special case of WMW would falsely conclude significant median difference despite identical medians.
-```{r plot_example2, fig.width=10, fig.height=10, include=T, fig.align='center', fig.show='hold', out.width = "100%", echo = FALSE}
-# Erroneous use of location-shift special case would falsely 
-# conclude significant median difference despite identical medians
-wml <- wmw_test(y ~ group, data = da, special_case = TRUE,
-                 ref_level = 'control')
-wml
-```
-
-Indeed, the medians are essentially the same:
-```{r meds}
-median(da$y[da$group == 'case'])
-median(da$y[da$group == 'control'])
-```
-
-
-## Example 3
-
-WMW applied to another real-life data set.
-
-```{r Ex3}
-data(wesdr)
-da = wesdr
-da$ret = as.factor(da$ret)
-# WMW 
-wmd <- wmw_test(bmi ~ ret, data = da, ref_level = '0')
-wmd
-```
-
-```{r roc_Ex3, fig.width=5, fig.height=5, include=T, fig.align='center', fig.show='hold', out.width = "50%", echo = FALSE}
-plot(wmd)
-```
-
-### EDA to assess location shift assumption validity
-
-```{r quadruplot_Ex3, fig.width=11, fig.height=8, include=T, fig.align='center', fig.show='hold', out.width = "100%", echo = FALSE}
-# EDA to assess location shift assumption validity
-qp <- quadruplot(bmi ~ ret, data = da, ref_level = '0')
-qp
-# => location shift assumption is tenable
-```
-hence, location shift assumption is tenable.
-
-### Special case of WMW test
-```{r Ex3_contd}
-wml <- wmw_test(bmi ~ ret, data = da, ref_level = '0', 
-                 ci_method = 'boot', special_case = TRUE, n_grid = 100)
-wml
-```
-
-Plot 
-```{r plot_ex3, fig.width=11, fig.height=5, include=T, fig.align='center', fig.show='hold', out.width = "100%", echo = FALSE}
-plot(wml)
+```{r Ex1_pseudomedian}
+set.seed(123L)
+wmd_pm <- wmwAUC_test(P19099 ~ MS, data = df, ref_level = 'no', pseudomedian = TRUE)
+wmd_pm
 ```
 
 # Acknowledgements
 
-AI-assisted code generation via Claude Pro by Anthropic was used in development. 
-All generated content was verified, tested, and enhanced by the package author.
+AI-assisted code generation via Claude Pro by Anthropic was used in
+development. All generated content was verified, tested, and enhanced by
+the package author.
 
 # References
-
-
