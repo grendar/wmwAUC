@@ -2,13 +2,12 @@ wmwAUC Test of No Group Discrimination
 ================
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-
-# wmwAUC
-
 <!-- badges: start -->
 
 [![CRAN
 status](https://www.r-pkg.org/badges/version/wmwAUC)](https://cran.r-project.org/package=wmwAUC)
+[![Dev
+version](https://img.shields.io/badge/devel%20version-1.0.0.9000-blue.svg)](https://github.com/grendar/wmwAUC)
 [![CRAN
 downloads](https://cranlogs.r-pkg.org/badges/grand-total/wmwAUC)](https://cran.r-project.org/package=wmwAUC)
 
@@ -17,18 +16,10 @@ downloads](https://cranlogs.r-pkg.org/badges/grand-total/wmwAUC)](https://cran.r
 The classical Wilcoxon-Mann-Whitney (WMW) test is calibrated under the
 null hypothesis $\mathrm{H_0\colon F = G}$. However, the WMW test
 statistic, when standardized, is the empirical AUC (eAUC), and hence the
-test in fact assesses the set $\{\mathrm{(F,G)\colon AUC = 0.5}\}$ –
-which does not match $\mathrm{H_0\colon F = G}$. This incoherence causes
-that WMW test provides erroneous inferences.
-
-Through Monte Carlo analysis of zero-mean heteroskedastic Gaussians and
-corresponding asymptotic theory, we demonstrate this mismatch directly:
-the eAUC concentrates on 0.5 even when $\mathrm{F \neq G}$, showing that
-the classical test’s calibration cannot be tracking distributional
-equality. Moreover, the traditional alternative hypothesis of stochastic
-dominance is unnecessarily restrictive; the WMW statistic is consistent
-against the broader alternative $\mathrm{H_1\colon AUC \neq 0.5}$, as
-established by Van Dantzig (1951).
+test in fact assesses the set
+$\lbrace\mathrm{(F,G)\colon AUC = 0.5}\rbrace$, which does not match
+$\mathrm{H_0\colon F = G}$. This incoherence causes that WMW test
+provides erroneous inferences.
 
 **wmwAUC** implements a properly calibrated test of
 $\mathrm{H_0\colon AUC = 0.5}$ based on the WMW statistic; for details,
@@ -41,12 +32,12 @@ asymptotic inference and two finite-sample bias-correction methods:
   decomposition theory. Reduces correctly to the continuous case when no
   ties are present.
 
-- *Bias-Corrected* (BC) Method: Alternative using individual  
+- *Bias-Corrected* (BC) Method: Alternative method using individual
   placement-component bias correction with $O(n^{-1})$ finite-sample
-  corrections and Welch-Satterthwaite degrees of freedom. Derived for 
-  continuous data (Sect. 4 of the paper); the implementation extends 
-  this to ties via the same mid-rank kernel as EU, with conservative behavior 
-  confirmed by simulation to persist under ties.
+  corrections and Welch-Satterthwaite degrees of freedom. Derived for
+  continuous data (Sect. 4 of the paper); the implementation extends
+  this to ties via the same mid-rank kernel as EU, with conservative
+  behavior confirmed by simulation to persist under ties.
 
 The EU method serves as the default implementation, providing:
 
@@ -83,13 +74,83 @@ instead.)
 
 ## Installation
 
-You can install the development version of wmwAUC using
+Install the released version from CRAN:
 
 ``` r
-devtools::install_github('grendar/wmwAUC')
+install.packages("wmwAUC")
 ```
 
-## Simulation 1
+Or the development version from GitHub:
+
+``` r
+# install.packages("remotes")
+remotes::install_github("grendar/wmwAUC")
+```
+
+## Example
+
+Real data analyzed by wmwAUC test of no group discrimination.
+
+``` r
+data(gemR::MS)
+da <- MS
+
+# preparing data frame
+class(da$proteins) <- setdiff(class(da$proteins), "AsIs")
+df <- as.data.frame(da$proteins)
+df$MS <- da$MS
+```
+
+### wmwAUC test of no group discrimination
+
+``` r
+wmd <- wmwAUC_test(P19099 ~ MS, data = df, ref_level = 'no')
+wmd
+#> 
+#>         wmwAUC Test of No Group Discrimination (H0: AUC = 1/2)
+#> 
+#> data: P19099 by MS (n1 = 37, n2 = 64)
+#> groups: yes vs no (reference)
+#> U = 1726, eAUC = 0.729, p-value = 0.000012, method = EU
+#> alternative hypothesis for AUC: two.sided 
+#> 95 percent confidence interval for AUC (delong): 
+#>  0.632 0.826
+```
+
+<img src="man/figures/README-plot_ex1-1.png" width="75%" style="display: block; margin: auto;" />
+
+### AUC-equalizing shift (pseudomedian)
+
+``` r
+set.seed(123L)
+wmd_pm <- wmwAUC_test(P19099 ~ MS, data = df, ref_level = 'no', pseudomedian = TRUE)
+wmd_pm
+#> 
+#>         wmwAUC Test of No Group Discrimination (H0: AUC = 1/2)
+#> 
+#> data: P19099 by MS (n1 = 37, n2 = 64)
+#> groups: yes vs no (reference)
+#> U = 1726, eAUC = 0.729, p-value = 0.000012, method = EU
+#> alternative hypothesis for AUC: two.sided 
+#> 95 percent confidence interval for AUC (delong): 
+#>  0.632 0.826
+#> 
+#> AUC-equalizing shift (pseudomedian):
+#>  0.642 [solves P(X < Y + delta) = 0.5]
+#> 95 percent confidence interval for the pseudomedian:
+#>  0.465 0.934
+```
+
+## Monte Carlo simulations
+
+Through Monte Carlo analysis of *zero-mean heteroskedastic Gaussians*
+and corresponding asymptotic theory, we demonstrate the mismatch between
+the null of the WMW test and the statistic-implied null set directly:
+the eAUC concentrates on 0.5 even when $\mathrm{F \neq G}$, showing that
+the classical WMW test’s calibration cannot be tracking distributional
+equality.
+
+### Simulation 1
 
 Consider the setting of two zero-mean different-scale gaussians. Then
 the traditional $\mathrm{H_0\colon F = G}$ of the classical WMW test is
@@ -150,12 +211,13 @@ Traditional p-values under $\mathrm{H_1}$ should concentrate near 0.
 
 Correct p-values for testing $\mathrm{H_0\colon AUC = 0.5}$.
 
-## Simulation 2
+### Simulation 2
 
 The two zero-mean different-scale gaussians setting does not satisfy the
 traditional $\mathrm{H_1}$ of the stochastic dominance. But, as proved
 by Van Dantzig in 1951, the WMW statistic is consistent for the broader
-$\mathrm{H_1\colon AUC \neq 0.5}$.
+$\mathrm{H_1\colon AUC \neq 0.5}$. The following MC simulation
+demonstrates the consistency.
 
 ``` r
 #############################################################################
@@ -191,60 +253,6 @@ data(simulation2)  # List of eauc, pval_wt, pval_wmwAUC
 ```
 
 <img src="man/figures/README-hist_sim2-1.png" width="50%" style="display: block; margin: auto;" /><img src="man/figures/README-hist_sim2-2.png" width="50%" style="display: block; margin: auto;" /><img src="man/figures/README-hist_sim2-3.png" width="50%" style="display: block; margin: auto;" />
-
-## Example 1
-
-Real data analyzed by wmwAUC test of no group discrimination.
-
-``` r
-data(gemR::MS)
-da <- MS
-
-# preparing data frame
-class(da$proteins) <- setdiff(class(da$proteins), "AsIs")
-df <- as.data.frame(da$proteins)
-df$MS <- da$MS
-```
-
-### Test of no group discrimination
-
-``` r
-wmd <- wmwAUC_test(P19099 ~ MS, data = df, ref_level = 'no')
-wmd
-#> 
-#>         wmwAUC Test of No Group Discrimination (H0: AUC = 1/2)
-#> 
-#> data: P19099 by MS (n1 = 37, n2 = 64)
-#> groups: yes vs no (reference)
-#> U = 1726, eAUC = 0.729, p-value = 0.000012, method = EU
-#> alternative hypothesis for AUC: two.sided 
-#> 95 percent confidence interval for AUC (delong): 
-#>  0.632 0.826
-```
-
-<img src="man/figures/README-plot_ex1-1.png" width="75%" style="display: block; margin: auto;" />
-
-### AUC-equalizing shift (pseudomedian)
-
-``` r
-set.seed(123L)
-wmd_pm <- wmwAUC_test(P19099 ~ MS, data = df, ref_level = 'no', pseudomedian = TRUE)
-wmd_pm
-#> 
-#>         wmwAUC Test of No Group Discrimination (H0: AUC = 1/2)
-#> 
-#> data: P19099 by MS (n1 = 37, n2 = 64)
-#> groups: yes vs no (reference)
-#> U = 1726, eAUC = 0.729, p-value = 0.000012, method = EU
-#> alternative hypothesis for AUC: two.sided 
-#> 95 percent confidence interval for AUC (delong): 
-#>  0.632 0.826
-#> 
-#> AUC-equalizing shift (pseudomedian):
-#>  0.642 [solves P(X < Y + delta) = 0.5]
-#> 95 percent confidence interval for the pseudomedian:
-#>  0.465 0.934
-```
 
 # Acknowledgements
 

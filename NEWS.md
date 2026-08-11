@@ -1,3 +1,7 @@
+# wmwAUC (development version)
+
+* Reorganized README structure.
+
 # wmwAUC 1.0.0
 
 Major revision correcting several errors identified in 0.2.0. Function names

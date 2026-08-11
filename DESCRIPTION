@@ -1,6 +1,6 @@
 Package: wmwAUC
 Title: Test of No Group Discrimination Using the WMW Statistic
-Version: 1.0.0
+Version: 1.0.0.9000
 Date: 2026-07-21
 Authors@R:
     person("Marian", "Grendar", , "marian.grendar@gmail.com", role = c("aut", "cre"),
