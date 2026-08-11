@@ -1,0 +1,7 @@
+url: https://grendar.github.io/wmwAUC/
+template:
+  bootstrap: 5
+figures:
+  fig.width: 10
+  fig.height: 5
+  fig.retina: 2
