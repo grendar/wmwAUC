@@ -5,8 +5,9 @@ null hypothesis $`\mathrm{H_0\colon F = G}`$. However, the WMW test
 statistic, when standardized, is the empirical AUC (eAUC), and hence the
 test in fact assesses the set
 $`\lbrace\mathrm{(F,G)\colon AUC = 0.5}\rbrace`$, which does not match
-$`\mathrm{H_0\colon F = G}`$. This incoherence causes that WMW test
-provides erroneous inferences.
+$`\mathrm{H_0\colon F = G}`$. This incoherence ([Grendár
+2026](#ref-grendar2026dct)) causes that WMW test provides erroneous
+inferences.
 
 **wmwAUC** implements a properly calibrated test of
 $`\mathrm{H_0\colon AUC = 0.5}`$ based on the WMW statistic; for
@@ -265,6 +266,9 @@ the package author.
 
 Grendár, Marian. 2025. “Wilcoxon-Mann-Whitney Test of No Group
 Discrimination.” 2025. <https://arxiv.org/abs/2511.20308>.
+
+———. 2026. “Detection Coherence of Tests.” 2026.
+<https://arxiv.org/abs/2608.11177>.
 
 # Package index
 

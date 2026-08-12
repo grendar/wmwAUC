@@ -3,6 +3,7 @@
 ## wmwAUC (development version)
 
 - Reorganized README structure.
+- Added reference to Grendár (2026), arXiv:2608.11177, in README.
 
 ## wmwAUC 1.0.0
 
