@@ -7,7 +7,7 @@ Authors@R:
            comment = c(ORCID = "0000-0002-6712-3457"))
 Description: Implements a wmwAUC test of H0: AUC = 1/2 for continuous, discrete, or mixed random variables, based on the Wilcoxon-Mann-Whitney (WMW) statistic. The classic WMW test is calibrated under H0: {(F, G): F = G} which does not match the set {(F, G): AUC = 1/2}, implied by the test statistic, and consequently leads to erroneous inferences. wmwAUC is calibrated under the correct null and implements two finite-sample corrected p-value methods: an Exact Unbiased (EU) method and a Bias-Corrected (BC) method, both valid for any tie pattern. Methods are described in M. Grendar (2025) "Wilcoxon-Mann-Whitney Test of No Group Discrimination" <doi:10.48550/arXiv.2511.20308>.
 License: MIT + file LICENSE
-URL: https://github.com/grendar/wmwAUC
+URL: https://github.com/grendar/wmwAUC, https://grendar.github.io/wmwAUC/
 BugReports: https://github.com/grendar/wmwAUC/issues
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
